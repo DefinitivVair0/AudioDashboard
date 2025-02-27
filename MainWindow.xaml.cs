@@ -43,7 +43,7 @@ public partial class MainWindow : Window
 
     private void ClosingEventHandler(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (ap!=null) ap.Stop();
+        if (ap!=null) ap.Stop(); ap = null;
     }
 
     public void Update((string Info, double Volume, double Deviation) Data)
@@ -66,7 +66,11 @@ public partial class MainWindow : Window
 
     private void startBtn_Click(object sender, RoutedEventArgs e)
     {
-        if (deviceBox.SelectedItem != null && ap == null) { ap = new AudioProcessor((mmDevices.ElementAt(deviceBox.SelectedIndex))); ap.Start(); }
+        if (deviceBox.SelectedItem != null)
+        {
+            if (ap == null) { ap = new AudioProcessor(mmDevices.ElementAt(deviceBox.SelectedIndex)); ap.Start(); }
+            else { ap.Stop(); ap = new AudioProcessor(mmDevices.ElementAt(deviceBox.SelectedIndex)); ap.Start(); }
+        }
     }
 
     private void averageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

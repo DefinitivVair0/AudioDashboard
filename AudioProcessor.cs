@@ -19,12 +19,10 @@ namespace AudioDashboard
         private (string Info, double Volume, double Deviation) outData = ("",0, 0);
         public (string Info, double Volume, double Deviation) getData() { return outData; }
 
-        private int avg = 100;
         public bool setAverage(int avg)
         {
             if (avg > 0)
             {
-                this.avg = avg;
                 volumeStack.Clear();
                 volumeStack.Capacity = avg;
                 return true;
@@ -68,13 +66,12 @@ namespace AudioDashboard
             double vsSum = volumeStack.Sum();
 
             outData.Volume = max * 100;
-            if (volumeStack.Count != 0) { outData.Deviation = outData.Volume - vsSum / (volumeStack.Count); } else outData.Deviation = 0;
 
-
-
-                volumeStack.Add(outData.Volume);
+            if (volumeStack.Count != 0) { outData.Deviation = outData.Volume - vsSum / (volumeStack.Count); } 
+            else outData.Deviation = 0;
+            
+            volumeStack.Add(outData.Volume);
             while (volumeStack.Count >= volumeStack.Capacity-1 ) volumeStack.RemoveAt(0);
-
 
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(()=> { MainWindow.mw.Update(outData); }));
         }
