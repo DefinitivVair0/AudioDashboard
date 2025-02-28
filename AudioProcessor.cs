@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Threading;
 using NAudio;
 using NAudio.CoreAudioApi;
+using NAudio.Dsp;
 using NAudio.Wave;
 
 namespace AudioDashboard
@@ -16,8 +17,8 @@ namespace AudioDashboard
     {
         private WasapiCapture capture = new WasapiCapture(mmDevice);
 
-        private (string Info, double Volume, double Deviation) outData = ("",0, 0);
-        public (string Info, double Volume, double Deviation) getData() { return outData; }
+        private (string Info, float Volume, double Deviation) outData = ("",0, 0);
+        public (string Info, float Volume, double Deviation) getData() { return outData; }
 
         public bool setAverage(int avg)
         {

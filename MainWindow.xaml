@@ -31,31 +31,51 @@
         <Button x:Name="startBtn" Content="Start" HorizontalAlignment="Right" Margin="0,0,10,41" VerticalAlignment="Bottom" Width="123" Click="startBtn_Click" Background="#FF212121" Grid.Column="1" Height="25"/>
         <Button x:Name="stopBtn" Content="Stop" HorizontalAlignment="Right" Margin="0,0,10,10" Width="123" Click="stopBtn_Click" Background="#FF212121" Grid.Column="1" Height="25" VerticalAlignment="Bottom"/>
         <Label x:Name="infoLabel" Content="" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,266,38" Foreground="#FF00FFCA" BorderBrush="#FF009FFF" BorderThickness="1,1,1,1" Grid.Row="1">
+        <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" Foreground="#FF00FFCA" BorderBrush="#FF009FFF" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="4*"/>
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
 
                 <lvc:AngularGauge x:Name="angularGauge" FromValue="-100" ToValue="100" 
                           LabelsStep="100" TicksStep="10" Wedge="260"
-                          TicksForeground="#FF009E9B" Foreground="White" 
+                          Foreground="White" 
                           FontWeight="Bold" FontSize="16"
-                          SectionsInnerRadius=".7" NeedleFill="#FF009E9B" Margin="0,2,0,0" RenderTransformOrigin="0.501,0.522" Grid.Row="1">
+                          SectionsInnerRadius=".7" NeedleFill="#888888" Margin="0,2,0,0" RenderTransformOrigin="0.501,0.522" Grid.Row="1">
                     <lvc:AngularGauge.Sections>
-                        <lvc:AngularSection FromValue="-100" ToValue="-60" Fill="#CC3300"/>
-                        <lvc:AngularSection FromValue="-60" ToValue="-20" Fill="#CCCC00"/>
-                        <lvc:AngularSection FromValue="-20" ToValue="-5" Fill="#33CC00"/>
-                        <lvc:AngularSection FromValue="-5" ToValue="0" Fill="#009900"/>
-
-                        <lvc:AngularSection FromValue="0" ToValue="5" Fill="#009900"/>
-                        <lvc:AngularSection FromValue="5" ToValue="20" Fill="#33CC00"/>
-                        <lvc:AngularSection FromValue="20" ToValue="60" Fill="#CCCC00"/>
-                        <lvc:AngularSection FromValue="60" ToValue="100" Fill="#CC3300"/>
+                        <lvc:AngularSection FromValue="-100" ToValue="0"/>
+                        <lvc:AngularSection FromValue="0" ToValue="100"/>
                     </lvc:AngularGauge.Sections>
                 </lvc:AngularGauge>
+
                 <Slider x:Name="averageSlider" Foreground="#FF009E9B" Maximum="200" LargeChange="50" SmallChange="10" Value="100" TickPlacement="TopLeft" ValueChanged="averageSlider_ValueChanged" Grid.Row="0" IsSnapToTickEnabled="True" TickFrequency="10"/>
+
+                <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Deviation" LabelFormatter="{Binding YFormatter}" MinValue="-100" MaxValue="100" Position="LeftBottom" Foreground="#00FFFF">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="100" Stroke="#888888"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                        <lvc:Axis Title="Volume" LabelFormatter="{Binding YFormatter}" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator IsEnabled="False"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Samples" Labels="{Binding Labels}">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator IsEnabled="False"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
             </Grid>
         </GroupBox>
     </Grid>
