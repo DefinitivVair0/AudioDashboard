@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AudioDashboard"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
-        Title="ADB-v0" Height="450" Width="800" Closing="ClosingEventHandler" MinWidth="800" MinHeight="450" WindowStartupLocation="CenterScreen">
+        Title="ADB-v0" Height="600" Width="1080" Closing="ClosingEventHandler" MinWidth="800" MinHeight="450" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -27,11 +28,7 @@
                 </TransformGroup>
             </ProgressBar.RenderTransform>
         </ProgressBar>
-        <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,10,10,10" Background="#FF212121" Grid.Column="1" Grid.Row="1"/>
-        <Button x:Name="startBtn" Content="Start" HorizontalAlignment="Right" Margin="0,0,10,41" VerticalAlignment="Bottom" Width="123" Click="startBtn_Click" Background="#FF212121" Grid.Column="1" Height="25"/>
-        <Button x:Name="stopBtn" Content="Stop" HorizontalAlignment="Right" Margin="0,0,10,10" Width="123" Click="stopBtn_Click" Background="#FF212121" Grid.Column="1" Height="25" VerticalAlignment="Bottom"/>
-        <Label x:Name="infoLabel" Content="" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" Foreground="#FF00FFCA" BorderBrush="#FF009FFF" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0">
+        <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0" Foreground="#FF00DDFF" BorderBrush="#8800AAFF">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
@@ -41,6 +38,7 @@
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
+
 
                 <lvc:AngularGauge x:Name="angularGauge" FromValue="-100" ToValue="100" 
                           LabelsStep="100" TicksStep="10" Wedge="260"
@@ -57,19 +55,19 @@
 
                 <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Deviation" LabelFormatter="{Binding YFormatter}" MinValue="-100" MaxValue="100" Position="LeftBottom" Foreground="#00FFFF">
-                            <lvc:Axis.Separator>
-                                <lvc:Separator Step="100" Stroke="#888888"/>
-                            </lvc:Axis.Separator>
-                        </lvc:Axis>
-                        <lvc:Axis Title="Volume" LabelFormatter="{Binding YFormatter}" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
+                        <lvc:Axis Title="Volume" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
                             <lvc:Axis.Separator>
                                 <lvc:Separator IsEnabled="False"/>
                             </lvc:Axis.Separator>
                         </lvc:Axis>
+                        <lvc:Axis Title="Deviation" MinValue="-100" MaxValue="100" Position="RightTop" Foreground="#00DDFF">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="100" Stroke="#888888"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Samples" Labels="{Binding Labels}">
+                        <lvc:Axis Title="Samples">
                             <lvc:Axis.Separator>
                                 <lvc:Separator IsEnabled="False"/>
                             </lvc:Axis.Separator>
@@ -78,5 +76,58 @@
                 </lvc:CartesianChart>
             </Grid>
         </GroupBox>
+        <Button x:Name="startBtn" Content="I" HorizontalAlignment="Right" Margin="0,15,10,0" Width="25" Click="startBtn_Click" Background="#FF004600" Grid.Column="1" Grid.Row="1" Height="25" VerticalAlignment="Top"/>
+        <Button x:Name="stopBtn" Content="O" Margin="0,40,10,0" Click="stopBtn_Click" Background="#FFF80000" HorizontalAlignment="Right" Width="25" Grid.Column="1" Grid.Row="1" Height="24" VerticalAlignment="Top"/>
+        <Label Content="Multiplier" Margin="0,40,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="66" Height="24" VerticalAlignment="Top"/>
+        <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,15,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" TextChanged="bufferMSTextBox_TextChanged" Height="25" VerticalAlignment="Top"/>
+        <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Background="#FF212121" Margin="10,75,10,10" Grid.Column="1" Grid.Row="1"/>
+        <Label x:Name="infoLabel" Content="" Margin="10,10,142,0" Grid.Column="1" Grid.Row="1" Height="60" VerticalAlignment="Top"/>
+        <ScottPlot:WpfPlot x:Name="fftPlot" Margin="10,10,10,10"/>
+        <Label Content="Buffer ms" Margin="0,15,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="65" Height="25" VerticalAlignment="Top"/>
+        <TextBox x:Name="updateMulTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" Height="24" VerticalAlignment="Top" TextChanged="updateMulTextBox_TextChanged"/>
     </Grid>
+
+
+
+    <Window.Resources>
+        <BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
+        <Style TargetType="{x:Type GroupBox}">
+            <Setter Property="BorderBrush" Value="#D5DFE5" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GroupBox}">
+                        <Grid SnapsToDevicePixels="true">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="6" />
+                            </Grid.RowDefinitions>
+                            <Border CornerRadius="4" Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="4" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="Transparent" Background="{TemplateBinding Background}" />
+                            <Border Name="Header" Padding="3,1,3,0" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
+                                <ContentPresenter ContentSource="Header" RecognizesAccessKey="true" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                            <ContentPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            <Border Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="4"  BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="3">
+                                <Border.OpacityMask>
+                                    <MultiBinding Converter="{StaticResource BorderGapMaskConverter}" ConverterParameter="7">
+                                        <Binding ElementName="Header" Path="ActualWidth" />
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}" />
+                                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}" />
+                                    </MultiBinding>
+                                </Border.OpacityMask>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 </Window>
