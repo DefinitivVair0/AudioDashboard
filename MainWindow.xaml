@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AudioDashboard"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
         Title="ADB-v0" Height="450" Width="800" Closing="ClosingEventHandler" MinWidth="800" MinHeight="450" WindowStartupLocation="CenterScreen">
     <Grid>
@@ -27,10 +28,6 @@
                 </TransformGroup>
             </ProgressBar.RenderTransform>
         </ProgressBar>
-        <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,10,10,10" Background="#FF212121" Grid.Column="1" Grid.Row="1"/>
-        <Button x:Name="startBtn" Content="Start" HorizontalAlignment="Right" Margin="0,0,10,41" VerticalAlignment="Bottom" Width="123" Click="startBtn_Click" Background="#FF212121" Grid.Column="1" Height="25"/>
-        <Button x:Name="stopBtn" Content="Stop" HorizontalAlignment="Right" Margin="0,0,10,10" Width="123" Click="stopBtn_Click" Background="#FF212121" Grid.Column="1" Height="25" VerticalAlignment="Bottom"/>
-        <Label x:Name="infoLabel" Content="" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" Foreground="#FF00FFCA" BorderBrush="#FF009FFF" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0">
             <Grid>
                 <Grid.RowDefinitions>
@@ -41,6 +38,7 @@
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
+
 
                 <lvc:AngularGauge x:Name="angularGauge" FromValue="-100" ToValue="100" 
                           LabelsStep="100" TicksStep="10" Wedge="260"
@@ -57,19 +55,19 @@
 
                 <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Deviation" LabelFormatter="{Binding YFormatter}" MinValue="-100" MaxValue="100" Position="LeftBottom" Foreground="#00FFFF">
-                            <lvc:Axis.Separator>
-                                <lvc:Separator Step="100" Stroke="#888888"/>
-                            </lvc:Axis.Separator>
-                        </lvc:Axis>
-                        <lvc:Axis Title="Volume" LabelFormatter="{Binding YFormatter}" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
+                        <lvc:Axis Title="Volume" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
                             <lvc:Axis.Separator>
                                 <lvc:Separator IsEnabled="False"/>
                             </lvc:Axis.Separator>
                         </lvc:Axis>
+                        <lvc:Axis Title="Deviation" MinValue="-100" MaxValue="100" Position="RightTop" Foreground="#00FFFF">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="100" Stroke="#888888"/>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Samples" Labels="{Binding Labels}">
+                        <lvc:Axis Title="Samples">
                             <lvc:Axis.Separator>
                                 <lvc:Separator IsEnabled="False"/>
                             </lvc:Axis.Separator>
@@ -78,5 +76,12 @@
                 </lvc:CartesianChart>
             </Grid>
         </GroupBox>
+        <Button x:Name="startBtn" Content="I" HorizontalAlignment="Right" Margin="0,15,10,0" Width="25" Click="startBtn_Click" Background="#FF004600" Grid.Column="1" Grid.Row="1" Height="25" VerticalAlignment="Top"/>
+        <Button x:Name="stopBtn" Content="O" Margin="0,40,10,0" Click="stopBtn_Click" Background="#FFF80000" HorizontalAlignment="Right" Width="25" Grid.Column="1" Grid.Row="1" Height="24" VerticalAlignment="Top"/>
+        <Label Content="Buffer MS" Margin="0,15,40,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="65" Height="26" VerticalAlignment="Top"/>
+        <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,46,40,0" Grid.Row="1" TextWrapping="Wrap" Width="60" Text="50" TextChanged="bufferMSTextBox_TextChanged" Height="18" VerticalAlignment="Top"/>
+        <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Background="#FF212121" Margin="10,75,10,10" Grid.Column="1" Grid.Row="1"/>
+        <Label x:Name="infoLabel" Content="" Margin="10,10,105,0" Grid.Column="1" Grid.Row="1" Height="60" VerticalAlignment="Top"/>
+        <ScottPlot:WpfPlot x:Name="fftPlot" Margin="10,10,10,10"/>
     </Grid>
 </Window>
