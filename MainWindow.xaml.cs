@@ -36,17 +36,14 @@ namespace AudioDashboard;
 public partial class MainWindow : System.Windows.Window
 {
     public static MainWindow mw;
-
-    public System.Timers.Timer timer = new System.Timers.Timer();
+    public readonly Brush defaultBrush;
 
     public MainWindow()
     {
         mw = this;
         InitializeComponent();
 
-        timer.Interval = 80;
-        timer.AutoReset = true;
-        timer.Elapsed += UpdateFFT;
+        defaultBrush = bufferMSTextBox.Foreground;
 
         infoLabel.Content = "Block Allign:     Encoding:\nChannels    Sample Rate:\nBipS:     Average BpS:";
 
@@ -56,11 +53,14 @@ public partial class MainWindow : System.Windows.Window
             volumeValues.Add(float.NaN);
         }
 
+        bufferMSTextBox.Text = bufferMs.ToString();
+        updateMulTextBox.Text = updateMul.ToString();
+
         volumeBar.Foreground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 0);
         angularGauge.Sections[1].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
         angularGauge.Sections[0].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
         angularGauge.TicksForeground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 170, 0, 255), System.Windows.Media.Color.FromArgb(255, 0, 255, 255), 90);
-        
+
         SpectrumSeries = new SeriesCollection
         {
             new LineSeries
@@ -71,7 +71,8 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 1,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,0,255,255), System.Windows.Media.Color.FromArgb(255,0,255,255), 0)
+                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,0,255,255), System.Windows.Media.Color.FromArgb(255,0,255,255), 0),
+                ToolTip = null
             },
             new LineSeries
             {
@@ -81,7 +82,8 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 0,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,170,0,255), System.Windows.Media.Color.FromArgb(255,180,0,255), 0)
+                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,170,0,255), System.Windows.Media.Color.FromArgb(255,180,0,255), 0),
+                ToolTip = null
             }
         };
 
@@ -93,16 +95,23 @@ public partial class MainWindow : System.Windows.Window
             WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(wid);
             deviceBox.Items.Add(deviceInfo.ProductName);
         }
+
+        fftPlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+        fftPlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
+        fftPlot.Plot.Grid.IsVisible = false;
+        fftPlot.UserInputProcessor.IsEnabled = false;
     }
 
     private AudioProcessor ap = null;
 
     private ChartValues<double> deviationValues = new ChartValues<double> { };
-    private ChartValues<float> volumeValues = new ChartValues<float> { };
+    private ChartValues<double> volumeValues = new ChartValues<double> { };
     public SeriesCollection SpectrumSeries { get; set; }
 
+    private byte bufferMs = 20;
+    private byte updateMul = 2;
 
-    public void Update((string Info, float Volume, double Deviation) Data)
+    public void Update((string Info, double Volume, double Deviation) Data)
     {
         volumeBar.Value = Data.Volume;   
         
@@ -116,58 +125,6 @@ public partial class MainWindow : System.Windows.Window
     }
 
 
-
-
-
-
-    private double[] dataY2;
-
-    private static int SAMPLE_RESOLUTION = 16;
-    private static int BYTES_PER_POINT = SAMPLE_RESOLUTION / 8;
-
-    private FFTCalculator fftCalc;
-
-    private Task InitializeFFT()
-    {
-        dataY2 = new double[ap.getBufferSize() / BYTES_PER_POINT / 2];
-
-        fftPlot.Plot.Clear();
-
-        //fftPlot.Plot.Add.Scatter(dataX2,dataY2);
-        fftPlot.Plot.Add.Signal(dataY2);
-        fftPlot.Plot.Axes.SetLimitsX(-10, 2500);
-        fftPlot.Plot.Axes.SetLimitsY(-1, 100);
-
-        fftPlot.Refresh();
-
-        fftCalc = new FFTCalculator(ap, SAMPLE_RESOLUTION, BYTES_PER_POINT);
-
-        timer.Enabled = true;
-
-        return Task.CompletedTask;
-    }
-
-    public void UpdateFFT(object? sender, ElapsedEventArgs e)
-    {
-        if (ap == null) return;
-
-        var data = fftCalc.GetFFT();
-
-        if (data != null)
-        {
-            if (data.Value.FFT_Length < dataY2.Length) Array.Copy(data.Value.FFT_Magnitude, dataY2, data.Value.FFT_Length);
-            else if (dataY2.Length<data.Value.FFT_Length) Array.Copy(data.Value.FFT_Magnitude, dataY2,dataY2.Length);
-            fftPlot.Refresh();
-        }
-
-        timer.Enabled = true;
-    }
-
-
-
-
-
-
     private void ClosingEventHandler(object sender, System.ComponentModel.CancelEventArgs e)
     {
         if (ap != null) ap.Stop(); ap = null;
@@ -175,7 +132,6 @@ public partial class MainWindow : System.Windows.Window
 
     private void stopBtn_Click(object sender, RoutedEventArgs e)
     {
-        timer.Enabled = false;
         if (ap == null) return;
 
         ap.Stop();
@@ -201,18 +157,15 @@ public partial class MainWindow : System.Windows.Window
         stopBtn.Background = Brushes.Red;
     }
 
-    byte bufferMS = 50;
 
     private void startBtn_Click(object sender, RoutedEventArgs e)
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMS); ap.Start(); }
-            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMS); ap.Start(); }
+            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
+            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
             startBtn.Background = Brushes.Green;
             stopBtn.Background = Brushes.DarkRed;
-
-            InitializeFFT();
         }
     }
 
@@ -223,6 +176,48 @@ public partial class MainWindow : System.Windows.Window
 
     private void bufferMSTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        Byte.TryParse(bufferMSTextBox.Text, out bufferMS);
+        if (bufferMSTextBox.Text == "") return;
+
+        if (int.TryParse(bufferMSTextBox.Text, out int i))
+        {
+            if (i < 1) bufferMs = 1;
+            else if (i > 200) bufferMs = 200;
+            else bufferMs = (byte)i;
+
+            bufferMSTextBox.Text = bufferMs.ToString();
+
+            if (bufferMs < 20 && bufferMs >= 10) bufferMSTextBox.Foreground = Brushes.Yellow;
+            else if (bufferMs < 10) bufferMSTextBox.Foreground = Brushes.Red;
+            else bufferMSTextBox.Foreground = defaultBrush;
+        }
+        else MessageBox.Show("Input must be a whole number between 1 and 200");
+    }
+
+    private void updateMulTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (updateMulTextBox.Text == "") return;
+
+        if (int.TryParse(updateMulTextBox.Text, out int i))
+        {
+            if (i < 1) updateMul = 1;
+            else if (i > 10) updateMul = 10;
+            else updateMul = (byte)i;
+
+            updateMulTextBox.Text = updateMul.ToString();
+        }
+        else MessageBox.Show("Input must be a whole number between 1 and 10");
+    }
+
+
+
+    private bool isFullscreen = false;
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F11)
+        {
+            mw.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
+            mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
+            isFullscreen = !isFullscreen;
+        }
     }
 }
