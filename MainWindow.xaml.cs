@@ -110,6 +110,7 @@ public partial class MainWindow : System.Windows.Window
 
     private byte bufferMs = 20;
     private byte updateMul = 2;
+    private bool stereo = true;
 
     public void Update((string Info, double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
@@ -163,8 +164,8 @@ public partial class MainWindow : System.Windows.Window
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
-            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
+            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
+            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
             startBtn.Background = Brushes.Green;
             stopBtn.Background = Brushes.DarkRed;
         }
@@ -220,5 +221,10 @@ public partial class MainWindow : System.Windows.Window
             mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
             isFullscreen = !isFullscreen;
         }
+    }
+
+    private void stereoCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        stereo = stereoCheckBox.IsChecked.Value;
     }
 }
