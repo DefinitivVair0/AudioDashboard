@@ -19,7 +19,7 @@ To change the audio device/Buffer/Multiplier change/select to the desired option
 <details>
 	<summary> Stereo </summary>
 	Toggles the seperation of data into left and right channel.
-
+	
 	-> Allows the volume bars to change in relation to the corrosponding channel but at a higher performance impact
 </details>
 <details>
@@ -29,20 +29,21 @@ To change the audio device/Buffer/Multiplier change/select to the desired option
 <details>
 	<summary> Buffer ms </summary>
 	Selects the buffer update intervall.
-
+	
 	-> Range 1ms - 200ms
 
-	-> Smaller values can cause stuttering and unresponsiveness of the UI because of very high performance impact
+	-> Smaller values = lower FFT resolution but higher refresh rate (might cause artifacts and stuttering if to low)
+ 	-> Higher values = higher FFT resolution but lower refresh rate
 </details>
 <details>
 	<summary> Multiplier </summary>
 	Selects the UI update rate depending on the buffer update intervall.
-
+	
 	-> Range 1x - 10x
 
 	-> 1x = every buffer refresh causes one UI update -> 10x = every ten buffer refreshes cause one UI update
 
-	-> Allows the reduction of stuttering by slowing down the UI update while leaving the data gathering rate unchanged
+	-> Allows the reduction of stuttering by slowing down the UI update while leaving the data gathering rate and FFT resolution unchanged
 </details>
 
 
