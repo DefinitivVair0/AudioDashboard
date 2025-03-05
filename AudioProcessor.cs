@@ -14,15 +14,18 @@ namespace AudioDashboard
         private readonly bool stereo;
         private readonly WaveInEvent wvin;
         private readonly WpfPlot plot;
+        private readonly bool useFftWindow;
 
 
-        public AudioProcessor(int deviceNr, byte bufferMs = 20, int _SAMPLE_RATE = 48000, byte updateMul = 1, bool _stereo = false)
+        public AudioProcessor(int deviceNr, byte bufferMs = 20, int _SAMPLE_RATE = 48000, byte updateMul = 1, bool _stereo = false, bool fftWindow = true)
         {
             stereo = _stereo;
             SAMPLE_RATE = _SAMPLE_RATE;
             timer = new System.Timers.Timer { AutoReset = true, Interval = bufferMs*updateMul };
             timer.Elapsed += Update;
             plot = MainWindow.mw.fftPlot;
+            useFftWindow = fftWindow;
+            window = useFftWindow ? new() : null;
 
             plot.Plot.Axes.TightMargins();
             plot.Plot.Axes.SetLimitsY(0,5000);
@@ -43,7 +46,7 @@ namespace AudioDashboard
         }
 
 
-        private readonly FftSharp.Windows.Hanning window = new();
+        private readonly FftSharp.Windows.Hanning? window;
         private double[] lastBuffer;
         private double[]? lastBufferRight;
         private List<double> volumeStack = new List<double>(capacity: 100) { };
@@ -115,8 +118,8 @@ namespace AudioDashboard
             }
 
 
-                //FFT
-                window.ApplyInPlace(lastBuffer);
+            //FFT
+            if (useFftWindow) window.ApplyInPlace(lastBuffer);
             System.Numerics.Complex[] spectrum = FftSharp.FFT.Forward(FftSharp.Pad.ZeroPad(lastBuffer));
 
             var fftValue = FftSharp.FFT.Magnitude(spectrum);
