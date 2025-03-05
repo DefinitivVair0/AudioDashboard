@@ -56,7 +56,7 @@ public partial class MainWindow : System.Windows.Window
         bufferMSTextBox.Text = bufferMs.ToString();
         updateMulTextBox.Text = updateMul.ToString();
 
-        volumeBar.Foreground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 0);
+        volumeBarL.Foreground = volumeBarR.Foreground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 0);
         angularGauge.Sections[1].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
         angularGauge.Sections[0].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
         angularGauge.TicksForeground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 170, 0, 255), System.Windows.Media.Color.FromArgb(255, 0, 255, 255), 90);
@@ -110,11 +110,13 @@ public partial class MainWindow : System.Windows.Window
 
     private byte bufferMs = 20;
     private byte updateMul = 2;
+    private bool stereo = true;
 
-    public void Update((string Info, double Volume, double Deviation) Data)
+    public void Update((string Info, double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
-        volumeBar.Value = Data.Volume;   
-        
+        volumeBarL.Value = Data.VolumeL;
+        volumeBarR.Value = Data.VolumeR;
+
         angularGauge.Value = Data.Deviation;
 
         deviationValues.Add(Data.Deviation);
@@ -148,7 +150,7 @@ public partial class MainWindow : System.Windows.Window
 
         infoLabel.Content = "Block Allign:     Encoding:\nChannels    Sample Rate:\nBipS:     Average BpS:";
 
-        volumeBar.Value = 0;
+        volumeBarL.Value = volumeBarR.Value = 0;
         angularGauge.Value = 0;
 
         fftPlot.Plot.Clear();
@@ -162,8 +164,8 @@ public partial class MainWindow : System.Windows.Window
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
-            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul); ap.Start(); }
+            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
+            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
             startBtn.Background = Brushes.Green;
             stopBtn.Background = Brushes.DarkRed;
         }
@@ -219,5 +221,10 @@ public partial class MainWindow : System.Windows.Window
             mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
             isFullscreen = !isFullscreen;
         }
+    }
+
+    private void stereoCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        stereo = stereoCheckBox.IsChecked.Value;
     }
 }

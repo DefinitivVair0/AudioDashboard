@@ -17,17 +17,6 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-
-        <ProgressBar x:Name="volumeBar" Margin="10,0,10,10" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" Grid.Row="1" Height="23" VerticalAlignment="Bottom">
-            <ProgressBar.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform Angle="0"/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </ProgressBar.RenderTransform>
-        </ProgressBar>
         <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0" Foreground="#FF00DDFF" BorderBrush="#8800AAFF">
             <Grid>
                 <Grid.RowDefinitions>
@@ -81,10 +70,37 @@
         <Label Content="Multiplier" Margin="0,40,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="66" Height="24" VerticalAlignment="Top"/>
         <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,15,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" TextChanged="bufferMSTextBox_TextChanged" Height="25" VerticalAlignment="Top"/>
         <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Background="#FF212121" Margin="10,75,10,10" Grid.Column="1" Grid.Row="1"/>
-        <Label x:Name="infoLabel" Content="" Margin="10,10,142,0" Grid.Column="1" Grid.Row="1" Height="60" VerticalAlignment="Top"/>
+        <Label x:Name="infoLabel" Content="" Margin="10,10,22,0" Grid.Column="1" Height="75" VerticalAlignment="Top"/>
         <ScottPlot:WpfPlot x:Name="fftPlot" Margin="10,10,10,10"/>
         <Label Content="Buffer ms" Margin="0,15,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="65" Height="25" VerticalAlignment="Top"/>
         <TextBox x:Name="updateMulTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" Height="24" VerticalAlignment="Top" TextChanged="updateMulTextBox_TextChanged"/>
+        <Grid Margin="10,0,10,10" Grid.Row="1" Height="23" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="volumeBarL" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" BorderThickness="0,1,1,1">
+                <ProgressBar.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </ProgressBar.RenderTransform>
+            </ProgressBar>
+            <ProgressBar x:Name="volumeBarR" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" Grid.Column="1" BorderThickness="0,1,1,1">
+                <ProgressBar.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </ProgressBar.RenderTransform>
+            </ProgressBar>
+        </Grid>
+        <CheckBox x:Name="stereoCheckBox" Grid.Column="1" Content="Stereo" HorizontalAlignment="Left" Margin="10,21,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="stereoCheckBox_Changed" Checked="stereoCheckBox_Changed"/>
     </Grid>
 
 
