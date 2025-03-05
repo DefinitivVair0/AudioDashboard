@@ -71,8 +71,7 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 1,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,0,255,255), System.Windows.Media.Color.FromArgb(255,0,255,255), 0),
-                ToolTip = null
+                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,0,255,255), System.Windows.Media.Color.FromArgb(255,0,255,255), 0)
             },
             new LineSeries
             {
@@ -82,8 +81,7 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 0,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,170,0,255), System.Windows.Media.Color.FromArgb(255,180,0,255), 0),
-                ToolTip = null
+                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,170,0,255), System.Windows.Media.Color.FromArgb(255,180,0,255), 0)
             }
         };
 
@@ -111,6 +109,7 @@ public partial class MainWindow : System.Windows.Window
     private byte bufferMs = 20;
     private byte updateMul = 2;
     private bool stereo = true;
+    private bool fftWindow = true;
 
     public void Update((string Info, double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
@@ -131,6 +130,18 @@ public partial class MainWindow : System.Windows.Window
     {
         if (ap != null) ap.Stop(); ap = null;
     }
+
+    private bool isFullscreen = false;
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F11)
+        {
+            mw.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
+            mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
+            isFullscreen = !isFullscreen;
+        }
+    }
+
 
     private void stopBtn_Click(object sender, RoutedEventArgs e)
     {
@@ -164,12 +175,13 @@ public partial class MainWindow : System.Windows.Window
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
-            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo); ap.Start(); }
+            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo, fftWindow: fftWindow); ap.Start(); }
+            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo, fftWindow: fftWindow); ap.Start(); }
             startBtn.Background = Brushes.Green;
             stopBtn.Background = Brushes.DarkRed;
         }
     }
+
 
     private void averageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
@@ -210,21 +222,13 @@ public partial class MainWindow : System.Windows.Window
         else MessageBox.Show("Input must be a whole number between 1 and 10");
     }
 
-
-
-    private bool isFullscreen = false;
-    private void Window_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.F11)
-        {
-            mw.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
-            mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
-            isFullscreen = !isFullscreen;
-        }
-    }
-
     private void stereoCheckBox_Changed(object sender, RoutedEventArgs e)
     {
         stereo = stereoCheckBox.IsChecked.Value;
+    }
+
+    private void fftWindowCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        fftWindow = FftWindowCheckBox.IsChecked.Value;
     }
 }

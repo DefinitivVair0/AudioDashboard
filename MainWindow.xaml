@@ -42,7 +42,7 @@
 
                 <Slider x:Name="averageSlider" Foreground="#FF009E9B" Maximum="200" LargeChange="50" SmallChange="10" Value="100" TickPlacement="TopLeft" ValueChanged="averageSlider_ValueChanged" Grid.Row="0" IsSnapToTickEnabled="True" TickFrequency="10"/>
 
-                <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True">
+                <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True" DataTooltip="{x:Null}" Hoverable="False">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Volume" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
                             <lvc:Axis.Separator>
@@ -101,6 +101,7 @@
             </ProgressBar>
         </Grid>
         <CheckBox x:Name="stereoCheckBox" Grid.Column="1" Content="Stereo" HorizontalAlignment="Left" Margin="10,21,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="stereoCheckBox_Changed" Checked="stereoCheckBox_Changed"/>
+        <CheckBox x:Name="FftWindowCheckBox" Grid.Column="1" Content="FFT Window" HorizontalAlignment="Left" Margin="10,36,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="fftWindowCheckBox_Changed" Checked="fftWindowCheckBox_Changed"/>
     </Grid>
 
 
