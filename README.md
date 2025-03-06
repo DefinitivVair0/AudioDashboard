@@ -45,6 +45,15 @@ To change the audio device/Buffer/Multiplier change/select to the desired option
 
 	-> Allows the reduction of stuttering by slowing down the UI update while leaving the data gathering rate and FFT resolution unchanged
 </details>
+<details>
+	<summary> Sample Rate </summary>
+	The combo box selects the sample rate used for audio processing.
+	
+
+	-> The "Add SR" button can be used to add custom sample rates.
+
+	-> There is no security mechanisms in place yet so the program might crash on to high/low custom sample rates
+</details>
 
 
 ## Used packages

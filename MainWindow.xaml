@@ -117,7 +117,7 @@
             <ComboBoxItem Content="352.800Hz"/>
             <ComboBoxItem Content="384.000Hz"/>
         </ComboBox>
-        <Button x:Name="addCBBtn" Grid.Column="1" Content="New SR" HorizontalAlignment="Left" Margin="140,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="77" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
+        <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="140,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="77" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
     </Grid>
 
 
