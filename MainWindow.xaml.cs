@@ -1,52 +1,37 @@
-﻿using NAudio.CoreAudioApi;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
+using NAudio.Wave;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using NAudio;
-using LiveCharts;
-using LiveCharts.Wpf;
-using LiveCharts.Wpf.Charts.Base;
-using Microsoft.VisualBasic.Logging;
-using System.Timers;
-using Microsoft.Win32;
-using NAudio.Wave;
-using LiveCharts.Defaults;
-using LiveCharts.Helpers;
-using System.Collections.ObjectModel;
-using ScottPlot;
-using System.Numerics;
-using NAudio.Dsp;
-using ScottPlot.Plottables;
-using System.Security.Cryptography.Xml;
-using FftSharp.Windows;
-using System.Reflection;
-using System.Globalization;
 
 namespace AudioDashboard;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : System.Windows.Window
+public partial class MainWindow : Window
 {
+    //Support variables
     public static MainWindow mw;
     public readonly Brush defaultBrush;
     public readonly CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("de-DE");
 
     public MainWindow()
     {
-        mw = this;
         InitializeComponent();
 
+        //Variable and control initialization
+        mw = this;
+        DataContext = this;
         defaultBrush = bufferMSTextBox.Foreground;
+
+        volumeBarL.Foreground = volumeBarR.Foreground = new LinearGradientBrush(Color.FromArgb(255, 0, 255, 255), Color.FromArgb(255, 170, 0, 255), 0);
+        angularGauge.Sections[1].Fill = new LinearGradientBrush(Color.FromArgb(255, 0, 255, 255), Color.FromArgb(255, 170, 0, 255), 90);
+        angularGauge.Sections[0].Fill = new LinearGradientBrush(Color.FromArgb(255, 0, 255, 255), Color.FromArgb(255, 170, 0, 255), 90);
+        angularGauge.TicksForeground = new LinearGradientBrush(Color.FromArgb(255, 170, 0, 255), Color.FromArgb(255, 0, 255, 255), 90);
 
         infoLabel.Content = "Block Allign:     Encoding:\nChannels    Sample Rate:\nBipS:     Average BpS:";
 
@@ -59,13 +44,8 @@ public partial class MainWindow : System.Windows.Window
         bufferMSTextBox.Text = bufferMs.ToString();
         updateMulTextBox.Text = updateMul.ToString();
 
-        volumeBarL.Foreground = volumeBarR.Foreground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 0);
-        angularGauge.Sections[1].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
-        angularGauge.Sections[0].Fill = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 0, 255, 255), System.Windows.Media.Color.FromArgb(255, 170, 0, 255), 90);
-        angularGauge.TicksForeground = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(255, 170, 0, 255), System.Windows.Media.Color.FromArgb(255, 0, 255, 255), 90);
-
-        SpectrumSeries = new SeriesCollection
-        {
+        SpectrumSeries =
+        [
             new LineSeries
             {
                 Title = "Deviation",
@@ -74,7 +54,7 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 1,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,0,255,255), System.Windows.Media.Color.FromArgb(255,0,255,255), 0)
+                Stroke = new LinearGradientBrush(Color.FromArgb(0,0,255,255), Color.FromArgb(255,0,255,255), 0)
             },
             new LineSeries
             {
@@ -84,18 +64,16 @@ public partial class MainWindow : System.Windows.Window
                 ScalesYAt = 0,
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-                Stroke = new LinearGradientBrush(System.Windows.Media.Color.FromArgb(0,170,0,255), System.Windows.Media.Color.FromArgb(255,180,0,255), 0)
+                Stroke = new LinearGradientBrush(Color.FromArgb(0,170,0,255), Color.FromArgb(255,180,0,255), 0)
             }
-        };
+        ];
 
-        DataContext = this;
 
-        int waveInDevices = WaveIn.DeviceCount;
-        for (var wid = 0; wid < waveInDevices; wid++)
+        for (var device = 0; device < WaveIn.DeviceCount; device++)
         {
-            WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(wid);
-            deviceBox.Items.Add(deviceInfo.ProductName);
+            deviceBox.Items.Add(WaveIn.GetCapabilities(device).ProductName);
         }
+
 
         fftPlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
         fftPlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
@@ -103,39 +81,36 @@ public partial class MainWindow : System.Windows.Window
         fftPlot.UserInputProcessor.IsEnabled = false;
     }
 
-    private AudioProcessor ap = null;
 
-    private ChartValues<double> deviationValues = new ChartValues<double> { };
-    private ChartValues<double> volumeValues = new ChartValues<double> { };
+    private AudioProcessor? ap = null;
+
+    private readonly ChartValues<double> deviationValues = [];
+    private readonly ChartValues<double> volumeValues = [];
     public SeriesCollection SpectrumSeries { get; set; }
 
-    private byte bufferMs = 20;
-    private byte updateMul = 2;
-    private bool stereo = true;
-    private bool fftWindow = true;
-    private int sampleRate = 48000;
+    private int bufferMs = 20, updateMul = 2, sampleRate = 48000;
+    private bool stereo = true, fftWindow = true;
 
-    public void Update((string Info, double VolumeL, double VolumeR, double Volume, double Deviation) Data)
+    private bool isFullscreen = false;
+
+
+    public void Update((double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
         volumeBarL.Value = Data.VolumeL;
         volumeBarR.Value = Data.VolumeR;
 
         angularGauge.Value = Data.Deviation;
 
-        deviationValues.Add(Data.Deviation);
-        volumeValues.Add(Data.Volume);
-        if (deviationValues.Count >= 100) { deviationValues.RemoveAt(0); volumeValues.RemoveAt(0); }
-
-        infoLabel.Content = Data.Info;
+        deviationValues.Add(Data.Deviation); deviationValues.RemoveAt(0);
+        volumeValues.Add(Data.Volume); volumeValues.RemoveAt(0);
     }
 
 
     private void ClosingEventHandler(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (ap != null) ap.Stop(); ap = null;
+        ap?.Stop(); ap = null;
     }
 
-    private bool isFullscreen = false;
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.F11)
@@ -179,7 +154,7 @@ public partial class MainWindow : System.Windows.Window
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap != null) ap.Stop();
+            ap?.Stop();
 
             ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow);
             ap.Start();
@@ -192,7 +167,7 @@ public partial class MainWindow : System.Windows.Window
 
     private void averageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (ap!=null) ap.setAverage((int)averageSlider.Value);
+        ap?.setAverage((int)averageSlider.Value);
     }
 
     private void bufferMSTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -242,13 +217,15 @@ public partial class MainWindow : System.Windows.Window
     private void sampleRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         string val = sampleRateComboBox.SelectedItem.ToString().Substring(sampleRateComboBox.SelectedItem.ToString().LastIndexOf(':') + 2);
-        int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate);
+
+        if (!int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate)) MessageBox.Show("Input must be a whole number");
     }
 
     private void addCBBtn_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new InputDialog("Sample rate");
+        InputDialog dialog = new("Sample rate");
         dialog.ShowDialog();
+
         if (int.TryParse(dialog.Answer, out int sr))
         {
             sampleRateComboBox.Items.Add(sr.ToString("N0", cultureInfo) + "Hz");

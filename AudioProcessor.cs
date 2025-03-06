@@ -1,6 +1,4 @@
 ﻿using NAudio.Wave;
-using OpenTK.Core;
-using ScottPlot.TickGenerators;
 using ScottPlot.WPF;
 using System.Timers;
 using System.Windows;
@@ -10,49 +8,58 @@ namespace AudioDashboard
 {
     public class AudioProcessor
     {
+        //Audio processor
         private readonly System.Timers.Timer timer;
-        private readonly int SAMPLE_RATE;
-        private readonly bool stereo;
+
+        private readonly bool stereo, useFftWindow;
+        private readonly int samplerate;
+
         private readonly WaveInEvent wvin;
         private readonly WpfPlot plot;
-        private readonly bool useFftWindow;
 
+        //FFT
+        private double[]? lastBuffer, lastBufferRight, SignalData;
 
-        public AudioProcessor(int deviceNr, byte bufferMs = 20, int _SAMPLE_RATE = 48000, byte updateMul = 1, bool _stereo = false, bool fftWindow = true)
+        private readonly FftSharp.Windows.Hanning? window;
+
+        private List<double> volumeStack = new(capacity: 100) { };
+
+        //Output
+        (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
+
+        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, int updateMul = 1, bool stereo = false, bool useFftWindow = true)
         {
-            stereo = _stereo;
-            SAMPLE_RATE = _SAMPLE_RATE;
-            timer = new System.Timers.Timer { AutoReset = true, Interval = bufferMs*updateMul };
+            //Variable initialization
+            timer = new() { AutoReset = true, Interval = bufferMs * updateMul };
             timer.Elapsed += Update;
+
+            this.stereo = stereo;
+            this.useFftWindow = useFftWindow;
+            this.samplerate = samplerate;
+
             plot = MainWindow.mw.fftPlot;
-            useFftWindow = fftWindow;
             window = useFftWindow ? new() : null;
 
+            //Plot adjustment
             plot.Plot.Axes.TightMargins();
             plot.Plot.Axes.SetLimitsY(0,5000);
-            plot.Plot.Axes.SetLimitsX(0, SAMPLE_RATE/2);
+            plot.Plot.Axes.SetLimitsX(0, this.samplerate/2);
 
-            WaveFormat wf = new WaveFormat(rate: SAMPLE_RATE, bits: 16, channels: stereo ? 2 : 1);
-
+            //Initializing audio processor
+            WaveFormat wf = new(rate: this.samplerate, bits: 16, channels: stereo ? 2 : 1);
             wvin = new WaveInEvent
             {
                 DeviceNumber = deviceNr,
                 BufferMilliseconds = bufferMs,
                 WaveFormat = wf
             };
-
-            outData.Info = $"Block Allign: {wf.BlockAlign}   Encoding: {wf.Encoding}\nChannels: {wf.Channels}   Sample Rate: {wf.SampleRate}\nBipS: {wf.BitsPerSample}   Average BpS: {wf.AverageBytesPerSecond}";
-
             wvin.DataAvailable += OnDataAvailable;
+
+            MainWindow.mw.infoLabel.Content = $"Block Allign: {wf.BlockAlign}   Encoding: {wf.Encoding}\nChannels: {wf.Channels}   Sample Rate: {wf.SampleRate}\nBipS: {wf.BitsPerSample}   Average BpS: {wf.AverageBytesPerSecond}"; ;
         }
 
 
-        private readonly FftSharp.Windows.Hanning? window;
-        private double[] lastBuffer;
-        private double[]? lastBufferRight;
-        private List<double> volumeStack = new List<double>(capacity: 100) { };
-
-        private void OnDataAvailable(object? sender, WaveInEventArgs args)
+        private void OnDataAvailable(object? sender, WaveInEventArgs args) //Called by WaveIn
         {
             int bytesPerSample = wvin.WaveFormat.BitsPerSample / 8;
             int samplesRecorded = args.BytesRecorded / bytesPerSample;
@@ -72,46 +79,34 @@ namespace AudioDashboard
             }
         }
 
-        double[] SignalData = null!;
-        (string Info, double VolumeL, double VolumeR, double Volume, double Deviation) outData;
 
-        public void Update(object? sender, ElapsedEventArgs e)
+        public void Update(object? sender, ElapsedEventArgs e) //Called by timer
         {
             if (lastBuffer is null) return;
+
             timer.Stop();
 
             if (stereo)
             {
-                //Volume and Deviation Stereo
+                //Volume Stereo
                 outData.VolumeL = lastBuffer.Max() / 200;
                 outData.VolumeR = lastBufferRight.Max() / 200;
 
                 outData.Volume = (outData.VolumeL + outData.VolumeR) / 2; 
-
-                double vsAvg = volumeStack.Sum() / volumeStack.Count;
-                outData.Deviation = volumeStack.Count != 0 ? outData.Volume - vsAvg : 0;
-
-                volumeStack.Add(outData.Volume);
-
-                if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
             }
             else
             {
-                //Volume and Deviation Mono
+                //Volume Mono
                 outData.VolumeR = outData.VolumeL = outData.Volume = lastBuffer.Max() / 200;
-
-                double vsAvg = volumeStack.Sum() / volumeStack.Count;
-                outData.Deviation = volumeStack.Count != 0 ? outData.Volume - vsAvg : 0;
-
-                volumeStack.Add(outData.Volume);
-
-                if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
             }
 
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-            {
-                MainWindow.mw.Update(outData);
-            }));
+            outData.Deviation = volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0;
+            volumeStack.Add(outData.Volume);
+            if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
+
+
+            //Send output to MainWindow for update
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { MainWindow.mw.Update(outData); }));
 
 
             //FFT
@@ -119,20 +114,19 @@ namespace AudioDashboard
             System.Numerics.Complex[] spectrum = FftSharp.FFT.Forward(FftSharp.Pad.ZeroPad(lastBuffer));
 
             var fftValue = FftSharp.FFT.Magnitude(spectrum);
-
-            double[] fftFreq = FftSharp.FFT.FrequencyScale(fftValue.Length, SAMPLE_RATE);
+     //double[] fftFreq = FftSharp.FFT.FrequencyScale(fftValue.Length, samplerate);
 
 
             if (!plot.Plot.GetPlottables().Any())
             {
-                double samplePeriod = 1.0 / (2.0 * fftValue.Length / SAMPLE_RATE);
                 SignalData = fftValue;
-                plot.Plot.Add.Signal(SignalData, samplePeriod).Color = ScottPlot.Color.FromHex("#00DDFF");
+                plot.Plot.Add.Signal(SignalData, 1.0 / (2.0 * fftValue.Length / samplerate)).Color = ScottPlot.Color.FromHex("#00DDFF");
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
             
 
             plot.Refresh();
+
             timer.Start();
         }
 
@@ -151,6 +145,8 @@ namespace AudioDashboard
             wvin.Dispose();
         }
 
+
+        //Set self centering rate for deviation
         public bool setAverage(int avg)
         {
             if (avg > 0)
