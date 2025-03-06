@@ -216,13 +216,14 @@ public partial class MainWindow : Window
 
     private void sampleRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        string val = sampleRateComboBox.SelectedItem.ToString().Substring(sampleRateComboBox.SelectedItem.ToString().LastIndexOf(':') + 2);
-
-        if (!int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate)) MessageBox.Show("Input must be a whole number");
+        string val = sampleRateComboBox.SelectedItem.ToString().Substring(sampleRateComboBox.SelectedItem.ToString().LastIndexOf(':') + 1);
+        MessageBox.Show(string.Concat(val.Where(Char.IsDigit)));
+        int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate);
     }
 
     private void addCBBtn_Click(object sender, RoutedEventArgs e)
     {
+
         InputDialog dialog = new("Sample rate");
         dialog.ShowDialog();
 
