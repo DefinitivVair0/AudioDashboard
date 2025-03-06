@@ -9,6 +9,8 @@ namespace AudioDashboard
     public class AudioProcessor
     {
         //Audio processor
+        public int volReduction = 200;
+
         private readonly System.Timers.Timer timer;
 
         private readonly bool stereo, useFftWindow;
@@ -89,18 +91,18 @@ namespace AudioDashboard
             if (stereo)
             {
                 //Volume Stereo
-                outData.VolumeL = lastBuffer.Max() / 200;
-                outData.VolumeR = lastBufferRight.Max() / 200;
+                outData.VolumeL = lastBuffer.Max() / volReduction;
+                outData.VolumeR = lastBufferRight.Max() / volReduction;
 
-                outData.Volume = (outData.VolumeL + outData.VolumeR) / 2; 
+                outData.Volume = Math.Clamp((outData.VolumeL + outData.VolumeR) / 2, 0, 100);
             }
             else
             {
                 //Volume Mono
-                outData.VolumeR = outData.VolumeL = outData.Volume = lastBuffer.Max() / 200;
+                outData.VolumeR = outData.VolumeL = outData.Volume = Math.Clamp(lastBuffer.Max() / volReduction,0,100);
             }
-
-            outData.Deviation = volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0;
+            
+            outData.Deviation = Math.Clamp(volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0,-100,100);
             volumeStack.Add(outData.Volume);
             if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
 
