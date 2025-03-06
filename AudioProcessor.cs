@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using OpenTK.Core;
+using ScottPlot.TickGenerators;
 using ScottPlot.WPF;
 using System.Timers;
 using System.Windows;
@@ -93,11 +94,6 @@ namespace AudioDashboard
                 volumeStack.Add(outData.Volume);
 
                 if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
-
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-                {
-                    MainWindow.mw.Update(outData);
-                }));
             }
             else
             {
@@ -110,12 +106,12 @@ namespace AudioDashboard
                 volumeStack.Add(outData.Volume);
 
                 if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
-
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-                {
-                    MainWindow.mw.Update(outData);
-                }));
             }
+
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+            {
+                MainWindow.mw.Update(outData);
+            }));
 
 
             //FFT
@@ -134,6 +130,7 @@ namespace AudioDashboard
                 plot.Plot.Add.Signal(SignalData, samplePeriod).Color = ScottPlot.Color.FromHex("#00DDFF");
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
+            
 
             plot.Refresh();
             timer.Start();

@@ -27,6 +27,8 @@ using NAudio.Dsp;
 using ScottPlot.Plottables;
 using System.Security.Cryptography.Xml;
 using FftSharp.Windows;
+using System.Reflection;
+using System.Globalization;
 
 namespace AudioDashboard;
 
@@ -37,6 +39,7 @@ public partial class MainWindow : System.Windows.Window
 {
     public static MainWindow mw;
     public readonly Brush defaultBrush;
+    public readonly CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("de-DE");
 
     public MainWindow()
     {
@@ -110,6 +113,7 @@ public partial class MainWindow : System.Windows.Window
     private byte updateMul = 2;
     private bool stereo = true;
     private bool fftWindow = true;
+    private int sampleRate = 48000;
 
     public void Update((string Info, double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
@@ -175,8 +179,11 @@ public partial class MainWindow : System.Windows.Window
     {
         if (deviceBox.SelectedItem != null)
         {
-            if (ap == null) { ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo, fftWindow: fftWindow); ap.Start(); }
-            else { ap.Stop(); ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs: bufferMs, updateMul: updateMul, _stereo: stereo, fftWindow: fftWindow); ap.Start(); }
+            if (ap != null) ap.Stop();
+
+            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow);
+            ap.Start();
+
             startBtn.Background = Brushes.Green;
             stopBtn.Background = Brushes.DarkRed;
         }
@@ -230,5 +237,22 @@ public partial class MainWindow : System.Windows.Window
     private void fftWindowCheckBox_Changed(object sender, RoutedEventArgs e)
     {
         fftWindow = FftWindowCheckBox.IsChecked.Value;
+    }
+
+    private void sampleRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        string val = sampleRateComboBox.SelectedItem.ToString().Substring(sampleRateComboBox.SelectedItem.ToString().LastIndexOf(':') + 2);
+        int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate);
+    }
+
+    private void addCBBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new InputDialog("Sample rate");
+        dialog.ShowDialog();
+        if (int.TryParse(dialog.Answer, out int sr))
+        {
+            sampleRateComboBox.Items.Add(sr.ToString("N0", cultureInfo) + "Hz");
+            sampleRateComboBox.SelectedIndex = sampleRateComboBox.Items.Count - 1;
+        }
     }
 }
