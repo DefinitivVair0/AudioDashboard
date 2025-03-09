@@ -12,25 +12,25 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <GroupBox x:Name="groupBox" Header="Volume Deviation" Margin="10,10,10,38" BorderThickness="1,1,1,1" Grid.Row="1" Padding="0,5,0,0" Foreground="#FF00DDFF" BorderBrush="#8800AAFF">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
 
-                <lvc:AngularGauge x:Name="angularGauge" FromValue="-100" ToValue="100" 
+                <lvc:AngularGauge x:Name="angularGauge" FromValue="-100" ToValue="100"
                           LabelsStep="100" TicksStep="10" Wedge="260"
                           Foreground="White" 
                           FontWeight="Bold" FontSize="16"
@@ -43,7 +43,7 @@
 
                 <Slider x:Name="averageSlider" Foreground="#FF009E9B" Maximum="200" LargeChange="50" SmallChange="10" Value="100" TickPlacement="TopLeft" ValueChanged="averageSlider_ValueChanged" Grid.Row="0" IsSnapToTickEnabled="True" TickFrequency="10"/>
 
-                <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,10,10,10" Grid.Column="1" Grid.RowSpan="2" DisableAnimations="True" DataTooltip="{x:Null}" Hoverable="False">
+                <lvc:CartesianChart x:Name="lineChart" Series="{Binding SpectrumSeries}" LegendLocation="None" Margin="10,7,10,10" Grid.Column="1" DisableAnimations="True" DataTooltip="{x:Null}" Hoverable="False" Grid.Row="1">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Volume" MinValue="0" MaxValue="100" Position="RightTop" Foreground="#AA00FF">
                             <lvc:Axis.Separator>
@@ -64,6 +64,16 @@
                         </lvc:Axis>
                     </lvc:CartesianChart.AxisX>
                 </lvc:CartesianChart>
+                <Slider x:Name="gainSlider" Foreground="#FF009E9B" Maximum="1000" LargeChange="100" SmallChange="50" Value="200" TickPlacement="TopLeft" Grid.Row="0" IsSnapToTickEnabled="True" TickFrequency="25" Margin="1,0,-2,0" Minimum="25" ValueChanged="gainSlider_ValueChanged" RenderTransformOrigin="0.5,0.5" Grid.Column="1">
+                    <Slider.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Slider.RenderTransform>
+                </Slider>
             </Grid>
         </GroupBox>
         <Button x:Name="startBtn" Content="I" HorizontalAlignment="Right" Margin="0,15,10,0" Width="25" Click="startBtn_Click" Background="#FF004600" Grid.Column="1" Grid.Row="1" Height="25" VerticalAlignment="Top" BorderBrush="{x:Null}"/>
@@ -71,14 +81,15 @@
         <Label Content="Multiplier" Margin="0,40,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="66" Height="24" VerticalAlignment="Top" Foreground="#FF00DDFF"/>
         <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,15,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" TextChanged="bufferMSTextBox_TextChanged" Height="25" VerticalAlignment="Top" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
         <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Background="#FF212121" Margin="10,75,10,10" Grid.Column="1" Grid.Row="1" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
-        <Label x:Name="infoLabel" Content="" Margin="10,10,22,0" Grid.Column="1" Height="75" VerticalAlignment="Top"/>
+        <Label x:Name="infoLabel" Content="" Margin="0,34,22,0" Grid.Column="1" Height="75" VerticalAlignment="Top" HorizontalAlignment="Right" Width="301" HorizontalContentAlignment="Right"/>
         <ScottPlot:WpfPlot x:Name="fftPlot" Margin="10,10,10,10"/>
+        <ScottPlot:WpfPlot x:Name="execTimePlot" Margin="10,10,10,10" Grid.Column="1"/>
         <Label Content="Buffer ms" Margin="0,15,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="65" Height="25" VerticalAlignment="Top" Foreground="#FF00DDFF"/>
         <TextBox x:Name="updateMulTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" Height="24" VerticalAlignment="Top" TextChanged="updateMulTextBox_TextChanged" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
         <Grid Margin="10,0,10,10" Grid.Row="1" Height="23" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <ProgressBar x:Name="volumeBarL" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" BorderThickness="0,1,1,1" BorderBrush="{x:Null}">
                 <ProgressBar.RenderTransform>
@@ -103,7 +114,7 @@
         </Grid>
         <CheckBox x:Name="stereoCheckBox" Grid.Column="1" Content="Stereo" HorizontalAlignment="Left" Margin="10,21,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="stereoCheckBox_Changed" Checked="stereoCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF"/>
         <CheckBox x:Name="FftWindowCheckBox" Grid.Column="1" Content="FFT Window" HorizontalAlignment="Left" Margin="10,36,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="fftWindowCheckBox_Changed" Checked="fftWindowCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF"/>
-        <ComboBox Style="{DynamicResource ComboBoxTransparentStyle}" x:Name="sampleRateComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="139,18,0,0" Grid.Row="1" VerticalAlignment="Top" Width="79" SelectionChanged="sampleRateComboBox_SelectionChanged" Foreground="#FF00DDFF" Height="22" BorderBrush="{x:Null}" Background="{x:Null}">
+        <ComboBox Style="{DynamicResource ComboBoxTransparentStyle}" x:Name="sampleRateComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="129,18,0,0" Grid.Row="1" VerticalAlignment="Top" Width="89" SelectionChanged="sampleRateComboBox_SelectionChanged" Foreground="#FF00DDFF" Height="22" BorderBrush="{x:Null}" Background="{x:Null}">
             <ComboBoxItem Content="8.000Hz"/>
             <ComboBoxItem Content="11.025Hz"/>
             <ComboBoxItem Content="16.000Hz"/>
@@ -117,7 +128,7 @@
             <ComboBoxItem Content="352.800Hz"/>
             <ComboBoxItem Content="384.000Hz"/>
         </ComboBox>
-        <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="140,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="77" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
+        <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="129,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
     </Grid>
 
 

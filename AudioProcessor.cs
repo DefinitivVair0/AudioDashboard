@@ -9,13 +9,17 @@ namespace AudioDashboard
     public class AudioProcessor
     {
         //Audio processor
+        public int volReduction = 200;
+
         private readonly System.Timers.Timer timer;
 
         private readonly bool stereo, useFftWindow;
         private readonly int samplerate;
 
         private readonly WaveInEvent wvin;
-        private readonly WpfPlot plot;
+        private readonly WpfPlot plot, tplot;
+
+        private System.Diagnostics.Stopwatch watch = new();
 
         //FFT
         private double[]? lastBuffer, lastBufferRight, SignalData;
@@ -23,6 +27,7 @@ namespace AudioDashboard
         private readonly FftSharp.Windows.Hanning? window;
 
         private List<double> volumeStack = new(capacity: 100) { };
+        private List<long> times = new(capacity: 100);
 
         //Output
         (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
@@ -38,12 +43,22 @@ namespace AudioDashboard
             this.samplerate = samplerate;
 
             plot = MainWindow.mw.fftPlot;
+            tplot = MainWindow.mw.execTimePlot;
             window = useFftWindow ? new() : null;
 
             //Plot adjustment
             plot.Plot.Axes.TightMargins();
             plot.Plot.Axes.SetLimitsY(0,5000);
             plot.Plot.Axes.SetLimitsX(0, this.samplerate/2);
+
+            tplot.Plot.Axes.SetLimitsX(0, 100);
+            tplot.Plot.Axes.SetLimitsY(0, 10);
+            tplot.Plot.Add.Signal(times);
+
+            for (int i = 0; i<100;i++)
+            {
+                times.Add(0);
+            }
 
             //Initializing audio processor
             WaveFormat wf = new(rate: this.samplerate, bits: 16, channels: stereo ? 2 : 1);
@@ -84,23 +99,25 @@ namespace AudioDashboard
         {
             if (lastBuffer is null) return;
 
+            watch.Restart();
+
             timer.Stop();
 
             if (stereo)
             {
                 //Volume Stereo
-                outData.VolumeL = lastBuffer.Max() / 200;
-                outData.VolumeR = lastBufferRight.Max() / 200;
+                outData.VolumeL = lastBuffer.Max() / volReduction;
+                outData.VolumeR = lastBufferRight.Max() / volReduction;
 
-                outData.Volume = (outData.VolumeL + outData.VolumeR) / 2; 
+                outData.Volume = Math.Clamp((outData.VolumeL + outData.VolumeR) / 2, 0, 100);
             }
             else
             {
                 //Volume Mono
-                outData.VolumeR = outData.VolumeL = outData.Volume = lastBuffer.Max() / 200;
+                outData.VolumeR = outData.VolumeL = outData.Volume = Math.Clamp(lastBuffer.Max() / volReduction,0,100);
             }
-
-            outData.Deviation = volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0;
+            
+            outData.Deviation = Math.Clamp(volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0,-100,100);
             volumeStack.Add(outData.Volume);
             if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
 
@@ -127,7 +144,13 @@ namespace AudioDashboard
 
             plot.Refresh();
 
-            timer.Start();
+            watch.Stop();
+            times.Add(watch.ElapsedMilliseconds);
+            times.RemoveAt(0);
+
+            tplot.Refresh();
+
+            try { timer.Start(); } catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
 
