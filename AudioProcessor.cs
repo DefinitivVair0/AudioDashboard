@@ -1,4 +1,7 @@
-﻿using NAudio.Wave;
+﻿using FftSharp;
+using NAudio.Wave;
+using ScottPlot;
+using ScottPlot.TickGenerators;
 using ScottPlot.WPF;
 using System.Timers;
 using System.Windows;
@@ -13,13 +16,15 @@ namespace AudioDashboard
 
         private readonly System.Timers.Timer timer;
 
-        private readonly bool stereo, useFftWindow;
+        private readonly bool stereo, useFftWindow, useLogScale;
         private readonly int samplerate;
 
         private readonly WaveInEvent wvin;
         private readonly WpfPlot plot, tplot;
 
         private System.Diagnostics.Stopwatch watch = new();
+
+        public double[] logXs;
 
         //FFT
         private double[]? lastBuffer, lastBufferRight, SignalData;
@@ -32,7 +37,7 @@ namespace AudioDashboard
         //Output
         (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
 
-        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, int updateMul = 1, bool stereo = false, bool useFftWindow = true)
+        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, int updateMul = 1, bool stereo = false, bool useFftWindow = true, bool useLogScale = true)
         {
             //Variable initialization
             timer = new() { AutoReset = true, Interval = bufferMs * updateMul };
@@ -40,16 +45,26 @@ namespace AudioDashboard
 
             this.stereo = stereo;
             this.useFftWindow = useFftWindow;
+            this.useLogScale = useLogScale;
             this.samplerate = samplerate;
 
             plot = MainWindow.mw.fftPlot;
             tplot = MainWindow.mw.execTimePlot;
             window = useFftWindow ? new() : null;
 
-            //Plot adjustment
-            plot.Plot.Axes.TightMargins();
+            //Configure Plots
             plot.Plot.Axes.SetLimitsY(0,5000);
-            plot.Plot.Axes.SetLimitsX(0, this.samplerate/2);
+            plot.Plot.Axes.SetLimitsX(useLogScale ? 2 : 0, useLogScale ? Math.Log10(samplerate / 2) : samplerate / 2);
+
+            static string LogTickLabelFormatter(double x) => $"{Math.Pow(10, x):N0}";
+            plot.Plot.Axes.Bottom.TickGenerator = useLogScale ? new NumericAutomatic()
+            {
+                MinorTickGenerator = new LogMinorTickGenerator(),
+                IntegerTicksOnly = true,
+                LabelFormatter = LogTickLabelFormatter
+            } : new NumericAutomatic();
+            plot.Plot.Grid.XAxisStyle.IsVisible = useLogScale;
+
 
             tplot.Plot.Axes.SetLimitsX(0, 100);
             tplot.Plot.Axes.SetLimitsY(0, 10);
@@ -128,16 +143,17 @@ namespace AudioDashboard
 
             //FFT
             if (useFftWindow) window.ApplyInPlace(lastBuffer);
-            System.Numerics.Complex[] spectrum = FftSharp.FFT.Forward(FftSharp.Pad.ZeroPad(lastBuffer));
+            System.Numerics.Complex[] spectrum = FFT.Forward(Pad.ZeroPad(lastBuffer));
 
-            var fftValue = FftSharp.FFT.Magnitude(spectrum);
-     //double[] fftFreq = FftSharp.FFT.FrequencyScale(fftValue.Length, samplerate);
-
+            var fftValue = FFT.Magnitude(spectrum);
+            double[] fftFreq = FFT.FrequencyScale(fftValue.Length, samplerate);
 
             if (!plot.Plot.GetPlottables().Any())
             {
                 SignalData = fftValue;
-                plot.Plot.Add.Signal(SignalData, 1.0 / (2.0 * fftValue.Length / samplerate)).Color = ScottPlot.Color.FromHex("#00DDFF");
+
+                plot.Plot.Add.SignalXY(useLogScale ? fftFreq.Select(Math.Log10).ToArray() : fftFreq, SignalData, Color.FromHex("#00DDFF"));
+
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
             

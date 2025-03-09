@@ -1,7 +1,6 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
 using NAudio.Wave;
-using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -44,6 +43,9 @@ public partial class MainWindow : Window
 
         bufferMSTextBox.Text = bufferMs.ToString();
         updateMulTextBox.Text = updateMul.ToString();
+        stereoCheckBox.IsChecked = stereo;
+        FftWindowCheckBox.IsChecked = fftWindow;
+        LogScaleCheckBox.IsChecked = logScale;
 
         SpectrumSeries =
         [
@@ -78,8 +80,13 @@ public partial class MainWindow : Window
 
         fftPlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
         fftPlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
-        fftPlot.Plot.Grid.IsVisible = false;
+        fftPlot.Plot.Grid.YAxisStyle.MajorLineStyle.IsVisible = false;
+        fftPlot.Plot.Grid.XAxisStyle.IsVisible = false;
         fftPlot.UserInputProcessor.IsEnabled = false;
+
+        fftPlot.Plot.Grid.XAxisStyle.MajorLineStyle.Color = ScottPlot.Colors.Gray.WithAlpha(.5);
+        fftPlot.Plot.Grid.XAxisStyle.MinorLineStyle.Width = 1f;
+        fftPlot.Plot.Grid.XAxisStyle.MinorLineStyle.Color = ScottPlot.Colors.Gray.WithAlpha(.03);
 
         execTimePlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
         execTimePlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
@@ -88,14 +95,14 @@ public partial class MainWindow : Window
     }
 
 
-    private AudioProcessor? ap = null;
+    public AudioProcessor? ap = null;
 
     private readonly ChartValues<double> deviationValues = [];
     private readonly ChartValues<double> volumeValues = [];
     public SeriesCollection SpectrumSeries { get; set; }
 
-    private int bufferMs = 20, updateMul = 2, sampleRate = 48000;
-    private bool stereo = true, fftWindow = true;
+    private int bufferMs = 40, updateMul = 1, sampleRate = 48000;
+    private bool stereo = true, fftWindow = true, logScale = true;
 
     private bool isFullscreen = false;
 
@@ -162,7 +169,7 @@ public partial class MainWindow : Window
         {
             ap?.Stop();
 
-            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow);
+            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow, logScale);
             ap.Start();
 
             startBtn.Background = Brushes.Green;
@@ -213,6 +220,11 @@ public partial class MainWindow : Window
     private void stereoCheckBox_Changed(object sender, RoutedEventArgs e)
     {
         stereo = stereoCheckBox.IsChecked.Value;
+    }
+
+    private void LogScaleCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        logScale = LogScaleCheckBox.IsChecked.Value;
     }
 
     private void fftWindowCheckBox_Changed(object sender, RoutedEventArgs e)

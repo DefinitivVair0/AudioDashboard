@@ -7,7 +7,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <PlatformTarget>x64</PlatformTarget>
+    <Title>Audio Dashborad v0</Title>
+    <PackageIcon></PackageIcon>
+    <ApplicationIcon>ADBIco.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ADBIco.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FftSharp" Version="2.2.0" />

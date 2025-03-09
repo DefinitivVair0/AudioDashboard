@@ -129,6 +129,7 @@
             <ComboBoxItem Content="384.000Hz"/>
         </ComboBox>
         <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="129,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
+        <CheckBox x:Name="LogScaleCheckBox" Grid.Column="1" Content="Log FFT" HorizontalAlignment="Left" Margin="10,51,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="LogScaleCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF" Checked="LogScaleCheckBox_Changed"/>
     </Grid>
 
 
