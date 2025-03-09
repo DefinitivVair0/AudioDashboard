@@ -80,6 +80,11 @@ public partial class MainWindow : Window
         fftPlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
         fftPlot.Plot.Grid.IsVisible = false;
         fftPlot.UserInputProcessor.IsEnabled = false;
+
+        execTimePlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+        execTimePlot.Plot.Axes.Color(ScottPlot.Colors.Gray);
+        execTimePlot.Plot.Axes.Left.Label.Text = "Execution time (ms)";
+        execTimePlot.Plot.Axes.Left.Label.FontSize = 14;
     }
 
 
@@ -95,7 +100,7 @@ public partial class MainWindow : Window
     private bool isFullscreen = false;
 
 
-    public void Update((double VolumeL, double VolumeR, double Volume, double Deviation) Data)
+    public async Task Update((double VolumeL, double VolumeR, double Volume, double Deviation) Data)
     {
         volumeBarL.Value = Data.VolumeL;
         volumeBarR.Value = Data.VolumeR;
