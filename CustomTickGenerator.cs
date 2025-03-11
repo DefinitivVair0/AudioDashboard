@@ -28,9 +28,7 @@ namespace AudioDashboard
 
         public void Regenerate(CoordinateRange range, Edge edge, PixelLength size, SKPaint paint, LabelStyle labelStyle)
         {
-            Ticks = GenerateTicks(range, edge, size, new PixelLength(12), paint, labelStyle)
-                .Where(x => range.Contains(x.Position))
-                .ToArray();
+            Ticks = [.. GenerateTicks(range, edge, size, new PixelLength(12), paint, labelStyle).Where(x => range.Contains(x.Position))];
         }
 
         private Tick[] GenerateTicks(CoordinateRange range, Edge edge, PixelLength axisLength, PixelLength maxLabelLength, SKPaint paint, LabelStyle labelStyle, int depth = 0)
@@ -47,7 +45,7 @@ namespace AudioDashboard
             }
 
             double[] majorTickPositions = TickSpacingCalculator.GenerateTickPositions(range, axisLength, labelWidth);
-            string[] majorTickLabels = majorTickPositions.Select(x => LabelFormatter(x)).ToArray();
+            string[] majorTickLabels = [.. majorTickPositions.Select(x => LabelFormatter(x))];
 
             // determine if the actual tick labels are larger than predicted,
             // suggesting density is too high and overlapping may occur.
@@ -74,8 +72,8 @@ namespace AudioDashboard
                         indexesToKeep.Add(i);
                 }
 
-                positions = indexesToKeep.Select(x => positions[x]).ToArray();
-                labels = indexesToKeep.Select(x => labels[x]).ToArray();
+                positions = [.. indexesToKeep.Select(x => positions[x])];
+                labels = [.. indexesToKeep.Select(x => labels[x])];
             }
 
             var majorTicks = positions.Select((position, i) => Tick.Major(position, labels[i]+" Hz"));
