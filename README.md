@@ -27,6 +27,10 @@ To change the audio device/Buffer/Multiplier change/select to the desired option
 	Toggles the use of a window (Hanning) when calculating the FFT-Spectrum.
 </details>
 <details>
+	<summary> Log FFT </summary>
+	Toggles the use of a logarithmic scaling of the FFT-Spectrum.
+</details>
+<details>
 	<summary> Buffer ms </summary>
 	Selects the buffer update intervall.
 	
