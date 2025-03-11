@@ -80,9 +80,8 @@ namespace AudioDashboard
 
             var majorTicks = positions.Select((position, i) => Tick.Major(position, labels[i]+" Hz"));
 
-            string[] chars = { "2", "4", "6", "8", "2", "4", "6", "8", "2", "4", "6", "8", "2", "4", "6", "8" };
 
-            var minorTicks = MinorTickGenerator.GetMinorTicks(positions, visibleRange).Select((position, i) => new Tick(position, chars[i < chars.Length ? i : 0], false));
+            var minorTicks = MinorTickGenerator.GetMinorTicks(positions, visibleRange).Select((position, i) => new Tick(position, Utils.RepeatNumber(Enumerable.Range(2, 8).Where(x => x % 2 == 0), i).ToString(), false));
 
             return [.. majorTicks, .. minorTicks];
         }
