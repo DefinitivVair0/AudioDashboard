@@ -54,10 +54,10 @@ namespace AudioDashboard
 
             //Configure Plots
             plot.Plot.Axes.SetLimitsY(0,5000);
-            plot.Plot.Axes.SetLimitsX(useLogScale ? 2 : 0, useLogScale ? Math.Log10(samplerate / 2) : samplerate / 2);
+            plot.Plot.Axes.SetLimitsX(useLogScale ? 1.4 : 0, useLogScale ? Math.Log10(samplerate / 2) : samplerate / 2);
 
             static string LogTickLabelFormatter(double x) => $"{Math.Pow(10, x):N0}";
-            plot.Plot.Axes.Bottom.TickGenerator = useLogScale ? new NumericAutomatic()
+            plot.Plot.Axes.Bottom.TickGenerator = useLogScale ? new LabeledLogTickGenerator()
             {
                 MinorTickGenerator = new LogMinorTickGenerator(),
                 IntegerTicksOnly = true,
@@ -156,7 +156,7 @@ namespace AudioDashboard
 
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
-            
+
 
             plot.Refresh();
 
