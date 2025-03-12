@@ -24,8 +24,6 @@ namespace AudioDashboard
 
         private readonly System.Diagnostics.Stopwatch watch = new();
 
-        public double[] logXs;
-
         //FFT
         private double[]? lastBuffer, lastBufferRight, SignalData;
 
@@ -158,6 +156,7 @@ namespace AudioDashboard
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
 
+            plot.Refresh();
             tplot.Refresh();
 
             watch.Stop();
