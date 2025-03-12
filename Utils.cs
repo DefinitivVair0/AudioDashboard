@@ -1,4 +1,5 @@
-﻿using ScottPlot;
+﻿using FftSharp;
+using ScottPlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace AudioDashboard
         {
             while (index > list.Count()-1) index -= list.Count();
             return list.ElementAt(index);
+        }
+
+        public static int ExtractNumber(string inputString)
+        {
+            return int.TryParse(string.Concat(inputString.Where(Char.IsDigit)), out int result) ? result : -1;
         }
     }
 }

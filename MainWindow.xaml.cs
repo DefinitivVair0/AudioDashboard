@@ -233,7 +233,7 @@ public partial class MainWindow : Window
     {
         string val = sampleRateComboBox.SelectedItem.ToString().Substring(sampleRateComboBox.SelectedItem.ToString().LastIndexOf(':') + 1);
 
-        int.TryParse(string.Concat(val.Where(Char.IsDigit)), out sampleRate);
+        sampleRate = Utils.ExtractNumber(val);
     }
 
     private void addCBBtn_Click(object sender, RoutedEventArgs e)
