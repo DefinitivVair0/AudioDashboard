@@ -22,7 +22,7 @@ namespace AudioDashboard
         private readonly WaveInEvent wvin;
         private readonly WpfPlot plot, tplot;
 
-        private readonly System.Diagnostics.Stopwatch watch = new();
+        private System.Diagnostics.Stopwatch watch = new();
 
         public double[] logXs;
 
@@ -31,12 +31,11 @@ namespace AudioDashboard
 
         private readonly FftSharp.Windows.Hanning? window;
 
-        private readonly List<double> volumeStack = new(capacity: 100) { };
-        private readonly List<long> times = new(capacity: 100);
+        private List<double> volumeStack = new(capacity: 100) { };
+        private List<long> times = new(capacity: 100);
 
         //Output
         (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
-
 
         public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, int updateMul = 1, bool stereo = false, bool useFftWindow = true, bool useLogScale = true)
         {
@@ -153,16 +152,19 @@ namespace AudioDashboard
             {
                 SignalData = fftValue;
 
-                plot.Plot.Add.SignalXY(useLogScale ? [.. fftFreq.Select(Math.Log10)] : fftFreq, SignalData, Color.FromHex("#00DDFF"));
+                plot.Plot.Add.SignalXY(useLogScale ? fftFreq.Select(Math.Log10).ToArray() : fftFreq, SignalData, Color.FromHex("#00DDFF"));
 
             }
             else Array.Copy(fftValue, SignalData, fftValue.Length);
 
-            tplot.Refresh();
+
+            plot.Refresh();
 
             watch.Stop();
             times.Add(watch.ElapsedMilliseconds);
             times.RemoveAt(0);
+
+            tplot.Refresh();
 
             try { timer.Start(); } catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
@@ -184,7 +186,7 @@ namespace AudioDashboard
 
 
         //Set self centering rate for deviation
-        public bool SetAverage(int avg)
+        public bool setAverage(int avg)
         {
             if (avg > 0)
             {

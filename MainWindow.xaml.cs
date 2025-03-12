@@ -1,7 +1,6 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
 using NAudio.Wave;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -179,6 +178,11 @@ public partial class MainWindow : Window
     }
 
 
+    private void averageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        ap?.setAverage((int)averageSlider.Value);
+    }
+
     private void bufferMSTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (bufferMSTextBox.Text == "") return;
@@ -213,15 +217,20 @@ public partial class MainWindow : Window
         else MessageBox.Show("Input must be a whole number between 1 and 10");
     }
 
+    private void stereoCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        stereo = stereoCheckBox.IsChecked.Value;
+    }
 
-    private void averageSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => ap?.SetAverage((int)averageSlider.Value);
+    private void LogScaleCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        logScale = LogScaleCheckBox.IsChecked.Value;
+    }
 
-    private void stereoCheckBox_Changed(object sender, RoutedEventArgs e) => stereo = stereoCheckBox.IsChecked.Value;
-
-    private void LogScaleCheckBox_Changed(object sender, RoutedEventArgs e) => logScale = LogScaleCheckBox.IsChecked.Value;
-
-    private void fftWindowCheckBox_Changed(object sender, RoutedEventArgs e) => fftWindow = FftWindowCheckBox.IsChecked.Value;
-
+    private void fftWindowCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        fftWindow = FftWindowCheckBox.IsChecked.Value;
+    }
 
     private void gainSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
