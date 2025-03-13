@@ -52,7 +52,7 @@ namespace AudioDashboard
             window = useFftWindow ? new() : null;
 
             //Configure Plots
-            plot.Plot.Axes.SetLimitsY(0,5000);
+            plot.Plot.Axes.SetLimitsY(0, 5000);
             plot.Plot.Axes.SetLimitsX(useLogScale ? 1.4 : 0, useLogScale ? Math.Log10(samplerate / 2) : samplerate / 2);
 
             static string LogTickLabelFormatter(double x) => $"{Math.Pow(10, x):N0}";
@@ -69,7 +69,7 @@ namespace AudioDashboard
             tplot.Plot.Axes.SetLimitsY(0, 10);
             tplot.Plot.Add.Signal(times);
 
-            for (int i = 0; i<100;i++)
+            for (int i = 0; i < 100; i++)
             {
                 times.Add(0);
             }
@@ -128,10 +128,10 @@ namespace AudioDashboard
             else
             {
                 //Volume Mono
-                outData.VolumeR = outData.VolumeL = outData.Volume = Math.Clamp(lastBuffer.Max() / volReduction,0,100);
+                outData.VolumeR = outData.VolumeL = outData.Volume = Math.Clamp(lastBuffer.Max() / volReduction, 0, 100);
             }
-            
-            outData.Deviation = Math.Clamp(volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0,-100,100);
+
+            outData.Deviation = Math.Clamp(volumeStack.Count != 0 ? outData.Volume - volumeStack.Sum() / volumeStack.Count : 0, -100, 100);
             volumeStack.Add(outData.Volume);
             if (volumeStack.Count >= volumeStack.Capacity - 1) volumeStack.RemoveAt(0);
 

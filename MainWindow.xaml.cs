@@ -1,7 +1,6 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
 using NAudio.Wave;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,7 +35,7 @@ public partial class MainWindow : Window
 
         infoLabel.Content = "Block Allign:     Encoding:\nChannels    Sample Rate:\nBipS:     Average BpS:";
 
-        for (int i = 0; i<100;i++)
+        for (int i = 0; i < 100; i++)
         {
             deviationValues.Add(double.NaN);
             volumeValues.Add(float.NaN);
@@ -112,7 +111,7 @@ public partial class MainWindow : Window
     {
         volumeBarL.Value = Data.VolumeL;
         volumeBarR.Value = Data.VolumeR;
-        
+
         angularGauge.Value = Data.Deviation;
 
         deviationValues.Add(Data.Deviation); deviationValues.RemoveAt(0);
@@ -136,6 +135,20 @@ public partial class MainWindow : Window
     }
 
 
+    private void startBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (deviceBox.SelectedItem != null)
+        {
+            ap?.Stop();
+
+            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow, logScale);
+            ap.Start();
+
+            startBtn.Background = Brushes.Green;
+            stopBtn.Background = Brushes.DarkRed;
+        }
+    }
+
     private void stopBtn_Click(object sender, RoutedEventArgs e)
     {
         if (ap == null) return;
@@ -158,24 +171,10 @@ public partial class MainWindow : Window
         angularGauge.Value = 0;
 
         fftPlot.Plot.Clear();
-        
+        execTimePlot.Plot.Clear();
+
         startBtn.Background = Brushes.DarkGreen;
         stopBtn.Background = Brushes.Red;
-    }
-
-
-    private void startBtn_Click(object sender, RoutedEventArgs e)
-    {
-        if (deviceBox.SelectedItem != null)
-        {
-            ap?.Stop();
-
-            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow, logScale);
-            ap.Start();
-
-            startBtn.Background = Brushes.Green;
-            stopBtn.Background = Brushes.DarkRed;
-        }
     }
 
 

@@ -76,7 +76,7 @@ namespace AudioDashboard
                 labels = [.. indexesToKeep.Select(x => labels[x])];
             }
 
-            var majorTicks = positions.Select((position, i) => Tick.Major(position, labels[i]+" Hz"));
+            var majorTicks = positions.Select((position, i) => Tick.Major(position, labels[i] + " Hz"));
 
 
             var minorTicks = MinorTickGenerator.GetMinorTicks(positions, visibleRange).Select((position, i) => new Tick(position, Utils.RepeatNumber(Enumerable.Range(2, 8).Where(x => x % 2 == 0), i).ToString(), false));
