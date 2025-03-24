@@ -101,7 +101,8 @@ public partial class MainWindow : Window
     private readonly ChartValues<double> volumeValues = [];
     public SeriesCollection SpectrumSeries { get; set; }
 
-    private int bufferMs = 40, updateMul = 1, sampleRate = 48000;
+    private int bufferMs = 40, sampleRate = 48000;
+    private double updateMul = 1;
     private bool stereo = true, fftWindow = true, logScale = true;
 
     private bool isFullscreen = false;
@@ -137,6 +138,8 @@ public partial class MainWindow : Window
 
     private void startBtn_Click(object sender, RoutedEventArgs e)
     {
+        updateMulTextBox.Text = updateMul.ToString();
+
         if (deviceBox.SelectedItem != null)
         {
             ap?.Stop();
@@ -201,15 +204,16 @@ public partial class MainWindow : Window
     {
         if (updateMulTextBox.Text == "") return;
 
-        if (int.TryParse(updateMulTextBox.Text, out int i))
+        if (double.TryParse(updateMulTextBox.Text, out double i))
         {
-            if (i < 1) updateMul = 1;
+            if (i == 0) return;
+            if (i < 0) updateMul = 0.5;
             else if (i > 10) updateMul = 10;
-            else updateMul = (byte)i;
+            else updateMul = (double)i;
 
             updateMulTextBox.Text = updateMul.ToString();
         }
-        else MessageBox.Show("Input must be a whole number between 1 and 10");
+        else MessageBox.Show("Input must be a number between 0.x and 10");
     }
 
 

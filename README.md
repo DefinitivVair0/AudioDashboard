@@ -41,10 +41,15 @@ To change the audio device/Buffer/Multiplier change/select to the desired option
 <details>
 	<summary> Multiplier </summary>
 	Selects the UI update rate depending on the buffer update intervall.
+	(values below 1 are only used to make the fft graph on high buffer ms a bit more enjoyable and probably cause some loss of information)
 
-	-> Range 1x - 10x
+	-> Range 0.?x - 10x
 
-	-> 1x = every buffer refresh causes one UI update -> 10x = every ten buffer refreshes cause one UI update
+	-> 1x = every buffer refresh causes one UI update 
+	-> 10x = every ten buffer refreshes cause one UI update
+	-> 0,1x = every buffer refresh causes ten UI updates
+
+	! ATTENTION !	-	floating point numbers use "," instead of "." as the decimal seperator
 
 	-> Allows the reduction of stuttering by slowing down the UI update while leaving the data gathering rate unchanged
 </details>

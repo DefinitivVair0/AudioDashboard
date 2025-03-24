@@ -36,10 +36,10 @@ namespace AudioDashboard
         (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
 
 
-        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, int updateMul = 1, bool stereo = false, bool useFftWindow = true, bool useLogScale = true)
+        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, double updateMul = 1, bool stereo = false, bool useFftWindow = true, bool useLogScale = true)
         {
             //Variable initialization
-            timer = new() { AutoReset = true, Interval = bufferMs * updateMul };
+            timer = new() { AutoReset = true, Interval = bufferMs * updateMul};
             timer.Elapsed += Update;
 
             this.stereo = stereo;
