@@ -203,15 +203,15 @@ public partial class MainWindow : Window
     private void updateMulTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (updateMulTextBox.Text == "") return;
-
+        if (updateMulTextBox.Text.Contains('.')) updateMulTextBox.Text = updateMulTextBox.Text.Replace('.', ',');
         if (double.TryParse(updateMulTextBox.Text, out double i))
         {
             if (i == 0) return;
             if (i < 0) updateMul = 0.5;
-            else if (i > 10) updateMul = 10;
+            else if (i > 10) updateMul = 10f;
             else updateMul = (double)i;
 
-            updateMulTextBox.Text = updateMul.ToString();
+            updateMulTextBox.Text = updateMul.ToString("F2");
         }
         else MessageBox.Show("Input must be a number between 0.x and 10");
     }
