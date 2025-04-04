@@ -3,6 +3,7 @@ using NAudio.Wave;
 using ScottPlot;
 using ScottPlot.TickGenerators;
 using ScottPlot.WPF;
+using System.ComponentModel.DataAnnotations;
 using System.Timers;
 using System.Windows;
 using System.Windows.Threading;
@@ -14,20 +15,17 @@ namespace AudioDashboard
         //Audio processor
         public int volReduction = 200;
 
-        private readonly System.Timers.Timer timer;
+        private System.Timers.Timer? timer;
 
-        private readonly bool stereo, useFftWindow, useLogScale;
-        private readonly int samplerate;
-
-        private readonly WaveInEvent wvin;
-        private readonly WpfPlot plot, tplot;
+        private WaveInEvent? wvin;
+        private WpfPlot? plot, tplot;
 
         private readonly System.Diagnostics.Stopwatch watch = new();
 
         //FFT
         private double[]? lastBuffer, lastBufferRight, SignalData;
 
-        private readonly FftSharp.Windows.Hanning? window;
+        private FftSharp.Windows.Hanning? window;
 
         private readonly List<double> volumeStack = new(capacity: 100) { };
         private readonly List<long> times = new(capacity: 100);
@@ -36,74 +34,31 @@ namespace AudioDashboard
         (double VolumeL, double VolumeR, double Volume, double Deviation) outData;
 
 
-        public AudioProcessor(int deviceNr = 0, int bufferMs = 20, int samplerate = 48000, double updateMul = 1, bool stereo = false, bool useFftWindow = true, bool useLogScale = true)
-        {
-            //Variable initialization
-            timer = new() { AutoReset = true, Interval = bufferMs * updateMul};
-            timer.Elapsed += Update;
-
-            this.stereo = stereo;
-            this.useFftWindow = useFftWindow;
-            this.useLogScale = useLogScale;
-            this.samplerate = samplerate;
-
-            plot = MainWindow.mw.fftPlot;
-            tplot = MainWindow.mw.execTimePlot;
-            window = useFftWindow ? new() : null;
-
-            //Configure Plots
-            plot.Plot.Axes.SetLimitsY(0, 5000);
-            plot.Plot.Axes.SetLimitsX(useLogScale ? 1.4 : 0, useLogScale ? Math.Log10(samplerate / 2) : samplerate / 2);
-
-            static string LogTickLabelFormatter(double x) => $"{Math.Pow(10, x):N0}";
-            plot.Plot.Axes.Bottom.TickGenerator = useLogScale ? new LabeledLogTickGenerator()
-            {
-                MinorTickGenerator = new LogMinorTickGenerator(),
-                IntegerTicksOnly = true,
-                LabelFormatter = LogTickLabelFormatter
-            } : new NumericAutomatic();
-            plot.Plot.Grid.XAxisStyle.IsVisible = useLogScale;
-
-
-            tplot.Plot.Axes.SetLimitsX(0, 100);
-            tplot.Plot.Axes.SetLimitsY(0, 10);
-            tplot.Plot.Add.Signal(times);
-
-            for (int i = 0; i < 100; i++)
-            {
-                times.Add(0);
-            }
-
-            //Initializing audio processor
-            WaveFormat wf = new(rate: this.samplerate, bits: 16, channels: stereo ? 2 : 1);
-            wvin = new WaveInEvent
-            {
-                DeviceNumber = deviceNr,
-                BufferMilliseconds = bufferMs,
-                WaveFormat = wf
-            };
-            wvin.DataAvailable += OnDataAvailable;
-
-            MainWindow.mw.infoLabel.Content = $"Block Allign: {wf.BlockAlign}   Encoding: {wf.Encoding}\nChannels: {wf.Channels}   Sample Rate: {wf.SampleRate}\nBipS: {wf.BitsPerSample}   Average BpS: {wf.AverageBytesPerSecond}"; ;
-        }
+        public int DeviceNr { get; init; } = 0;
+        public int BufferMs { get; init; } = 20;
+        public int Samplerate { get; init; } = 48000;
+        public double UpdateMul { get; init; } = 1;
+        public bool Stereo { get; init; } = false;
+        public bool UseFftWindow { get; init; } = true;
+        public bool UseLogScale { get; init; } = true;
 
 
         private void OnDataAvailable(object? sender, WaveInEventArgs args) //Called by WaveIn
         {
-            int bytesPerSample = wvin.WaveFormat.BitsPerSample / 8;
+            int bytesPerSample = wvin!.WaveFormat.BitsPerSample / 8;
             int samplesRecorded = args.BytesRecorded / bytesPerSample;
 
             if (lastBuffer is null || lastBuffer.Length != samplesRecorded)
             {
-                lastBuffer = stereo ? new double[samplesRecorded / 2] : new double[samplesRecorded];
-                if (stereo) lastBufferRight = new double[samplesRecorded / 2];
+                lastBuffer = Stereo ? new double[samplesRecorded / 2] : new double[samplesRecorded];
+                if (Stereo) lastBufferRight = new double[samplesRecorded / 2];
             }
 
             int k = 0;
-            for (int i = 0; i < samplesRecorded; i += stereo ? 2 : 1)
+            for (int i = 0; i < samplesRecorded; i += Stereo ? 2 : 1)
             {
                 lastBuffer[k] = BitConverter.ToInt16(args.Buffer, i * bytesPerSample);
-                if (stereo) lastBufferRight[k] = BitConverter.ToInt16(args.Buffer, (i + 1) * bytesPerSample);
+                if (Stereo) lastBufferRight![k] = BitConverter.ToInt16(args.Buffer, (i + 1) * bytesPerSample);
                 k++;
             }
         }
@@ -115,13 +70,13 @@ namespace AudioDashboard
 
             watch.Restart();
 
-            timer.Stop();
+            timer!.Stop();
 
-            if (stereo)
+            if (Stereo)
             {
                 //Volume Stereo
                 outData.VolumeL = lastBuffer.Max() / volReduction;
-                outData.VolumeR = lastBufferRight.Max() / volReduction;
+                outData.VolumeR = lastBufferRight!.Max() / volReduction;
 
                 outData.Volume = Math.Clamp((outData.VolumeL + outData.VolumeR) / 2, 0, 100);
             }
@@ -137,27 +92,27 @@ namespace AudioDashboard
 
 
             //Send output to MainWindow for update
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { MainWindow.mw.Update(outData); }));
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => { MainWindow.mw!.Update(outData); }));
 
 
             //FFT
-            if (useFftWindow) window.ApplyInPlace(lastBuffer);
-            System.Numerics.Complex[] spectrum = FFT.Forward(Pad.ZeroPad(lastBuffer));
+            if (UseFftWindow) window!.ApplyInPlace(lastBuffer);
+            System.Numerics.Complex[]? spectrum = FFT.Forward(Pad.ZeroPad(lastBuffer));
 
             var fftValue = FFT.Magnitude(spectrum);
-            double[] fftFreq = FFT.FrequencyScale(fftValue.Length, samplerate);
+            double[]? fftFreq = FFT.FrequencyScale(fftValue.Length, Samplerate);
 
-            if (!plot.Plot.GetPlottables().Any())
+            if (!plot!.Plot.GetPlottables().Any())
             {
                 SignalData = fftValue;
 
-                plot.Plot.Add.SignalXY(useLogScale ? [.. fftFreq.Select(Math.Log10)] : fftFreq, SignalData, Color.FromHex("#00DDFF"));
+                plot.Plot.Add.SignalXY(UseLogScale ? [.. fftFreq.Select(Math.Log10)] : fftFreq, SignalData, Color.FromHex("#00DDFF"));
 
             }
-            else Array.Copy(fftValue, SignalData, fftValue.Length);
+            else Array.Copy(fftValue, SignalData!, fftValue.Length);
 
             plot.Refresh();
-            tplot.Refresh();
+            tplot!.Refresh();
 
             watch.Stop();
             times.Add(watch.ElapsedMilliseconds);
@@ -167,10 +122,58 @@ namespace AudioDashboard
         }
 
 
+        public void Init()
+        {
+            //Variable initialization
+            timer = new() { AutoReset = true, Interval = BufferMs * UpdateMul };
+            timer.Elapsed += Update;
+
+            plot = MainWindow.mw!.fftPlot;
+            tplot = MainWindow.mw.execTimePlot;
+            window = UseFftWindow ? new() : null;
+
+            //Configure Plots
+            plot.Plot.Axes.SetLimitsY(0, 5000);
+            plot.Plot.Axes.SetLimitsX(UseLogScale ? 1.4 : 0, UseLogScale ? Math.Log10(Samplerate / 2) : Samplerate / 2);
+
+            static string LogTickLabelFormatter(double x) => $"{Math.Pow(10, x):N0}";
+            plot.Plot.Axes.Bottom.TickGenerator = UseLogScale ? new LabeledLogTickGenerator()
+            {
+                MinorTickGenerator = new LogMinorTickGenerator(),
+                IntegerTicksOnly = true,
+                LabelFormatter = LogTickLabelFormatter
+            } : new NumericAutomatic();
+            plot.Plot.Grid.XAxisStyle.IsVisible = UseLogScale;
+
+
+            tplot.Plot.Axes.SetLimitsX(0, 100);
+            tplot.Plot.Axes.SetLimitsY(0, 10);
+            tplot.Plot.Add.Signal(times);
+
+            for (int i = 0; i < 100; i++)
+            {
+                times.Add(0);
+            }
+
+            //Initializing audio processor
+            WaveFormat wf = new(rate: this.Samplerate, bits: 16, channels: Stereo ? 2 : 1);
+            wvin = new WaveInEvent
+            {
+                DeviceNumber = DeviceNr,
+                BufferMilliseconds = BufferMs,
+                WaveFormat = wf
+            };
+            wvin.DataAvailable += OnDataAvailable;
+
+            MainWindow.mw.infoLabel.Content = $"Block Allign: {wf.BlockAlign}   Encoding: {wf.Encoding}\nChannels: {wf.Channels}   Sample Rate: {wf.SampleRate}\nBipS: {wf.BitsPerSample}   Average BpS: {wf.AverageBytesPerSecond}";
+        }
+
         public void Start()
         {
-            wvin.StartRecording();
-            timer.Start();
+            Init();
+
+            wvin!.StartRecording();
+            timer!.Start();
         }
 
         public void Stop()

@@ -15,7 +15,7 @@ namespace AudioDashboard;
 public partial class MainWindow : Window
 {
     //Support variables
-    public static MainWindow mw;
+    public static MainWindow? mw;
     public readonly Brush defaultBrush;
     public readonly CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("de-DE");
 
@@ -129,7 +129,7 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.F11)
         {
-            mw.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
+            mw!.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
             mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
             isFullscreen = !isFullscreen;
         }
@@ -144,7 +144,16 @@ public partial class MainWindow : Window
         {
             ap?.Stop();
 
-            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow, logScale);
+            ap = new AudioProcessor()
+            {
+                DeviceNr = deviceBox.SelectedIndex,
+                BufferMs = bufferMs,
+                Samplerate = sampleRate,
+                UpdateMul = updateMul,
+                Stereo = stereo,
+                UseFftWindow = fftWindow,
+                UseLogScale = logScale
+            };
             ap.Start();
 
             startBtn.Background = Brushes.Green;
