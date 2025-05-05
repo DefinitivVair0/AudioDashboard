@@ -5,6 +5,9 @@ This program is written in C# using WPF and used to visualize and analyze an aud
 
 **Please note that this project is currently in development and very much unfinished.**
 
+Preview:
+![image](https://github.com/user-attachments/assets/3eb4bc4c-2524-4b40-acfe-193bd4d691b1)
+
 
 ## How to use
 1. Select yout audio device
