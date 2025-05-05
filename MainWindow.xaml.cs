@@ -1,7 +1,6 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
 using NAudio.Wave;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +15,7 @@ namespace AudioDashboard;
 public partial class MainWindow : Window
 {
     //Support variables
-    public static MainWindow mw;
+    public static MainWindow? mw;
     public readonly Brush defaultBrush;
     public readonly CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("de-DE");
 
@@ -36,7 +35,7 @@ public partial class MainWindow : Window
 
         infoLabel.Content = "Block Allign:     Encoding:\nChannels    Sample Rate:\nBipS:     Average BpS:";
 
-        for (int i = 0; i<100;i++)
+        for (int i = 0; i < 100; i++)
         {
             deviationValues.Add(double.NaN);
             volumeValues.Add(float.NaN);
@@ -102,7 +101,8 @@ public partial class MainWindow : Window
     private readonly ChartValues<double> volumeValues = [];
     public SeriesCollection SpectrumSeries { get; set; }
 
-    private int bufferMs = 40, updateMul = 1, sampleRate = 48000;
+    private int bufferMs = 40, sampleRate = 48000;
+    private double updateMul = 1;
     private bool stereo = true, fftWindow = true, logScale = true;
 
     private bool isFullscreen = false;
@@ -112,7 +112,7 @@ public partial class MainWindow : Window
     {
         volumeBarL.Value = Data.VolumeL;
         volumeBarR.Value = Data.VolumeR;
-        
+
         angularGauge.Value = Data.Deviation;
 
         deviationValues.Add(Data.Deviation); deviationValues.RemoveAt(0);
@@ -129,12 +129,37 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.F11)
         {
-            mw.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
+            mw!.WindowState = isFullscreen ? WindowState.Normal : WindowState.Maximized;
             mw.WindowStyle = isFullscreen ? WindowStyle.SingleBorderWindow : WindowStyle.None;
             isFullscreen = !isFullscreen;
         }
     }
 
+
+    private void startBtn_Click(object sender, RoutedEventArgs e)
+    {
+        updateMulTextBox.Text = updateMul.ToString();
+
+        if (deviceBox.SelectedItem != null)
+        {
+            ap?.Stop();
+
+            ap = new AudioProcessor()
+            {
+                DeviceNr = deviceBox.SelectedIndex,
+                BufferMs = bufferMs,
+                Samplerate = sampleRate,
+                UpdateMul = updateMul,
+                Stereo = stereo,
+                UseFftWindow = fftWindow,
+                UseLogScale = logScale
+            };
+            ap.Start();
+
+            startBtn.Background = Brushes.Green;
+            stopBtn.Background = Brushes.DarkRed;
+        }
+    }
 
     private void stopBtn_Click(object sender, RoutedEventArgs e)
     {
@@ -158,24 +183,10 @@ public partial class MainWindow : Window
         angularGauge.Value = 0;
 
         fftPlot.Plot.Clear();
-        
+        execTimePlot.Plot.Clear();
+
         startBtn.Background = Brushes.DarkGreen;
         stopBtn.Background = Brushes.Red;
-    }
-
-
-    private void startBtn_Click(object sender, RoutedEventArgs e)
-    {
-        if (deviceBox.SelectedItem != null)
-        {
-            ap?.Stop();
-
-            ap = new AudioProcessor(deviceBox.SelectedIndex, bufferMs, sampleRate, updateMul, stereo, fftWindow, logScale);
-            ap.Start();
-
-            startBtn.Background = Brushes.Green;
-            stopBtn.Background = Brushes.DarkRed;
-        }
     }
 
 
@@ -201,16 +212,17 @@ public partial class MainWindow : Window
     private void updateMulTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (updateMulTextBox.Text == "") return;
-
-        if (int.TryParse(updateMulTextBox.Text, out int i))
+        if (updateMulTextBox.Text.Contains('.')) updateMulTextBox.Text = updateMulTextBox.Text.Replace('.', ',');
+        if (double.TryParse(updateMulTextBox.Text, out double i))
         {
-            if (i < 1) updateMul = 1;
-            else if (i > 10) updateMul = 10;
-            else updateMul = (byte)i;
+            if (i == 0) return;
+            if (i < 0) updateMul = 0.5;
+            else if (i > 10) updateMul = 10f;
+            else updateMul = (double)i;
 
-            updateMulTextBox.Text = updateMul.ToString();
+            updateMulTextBox.Text = updateMul.ToString("F2");
         }
-        else MessageBox.Show("Input must be a whole number between 1 and 10");
+        else MessageBox.Show("Input must be a number between 0.x and 10");
     }
 
 

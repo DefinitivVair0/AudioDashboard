@@ -8,8 +8,8 @@
         xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
         Title="ADB-v0" Height="600" Width="1080" Closing="ClosingEventHandler" MinWidth="800" MinHeight="450" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown"
-    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" WindowState="Maximized">
-    <Grid Background="#FF212121">
+    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" WindowState="Maximized" Background="#FF1F1F1F">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
@@ -91,7 +91,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="volumeBarL" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" BorderThickness="0,1,1,1" BorderBrush="{x:Null}">
+            <ProgressBar x:Name="volumeBarL" Foreground="#FF00D8D3" Background="{x:Null}" RenderTransformOrigin="0.5,0.5" BorderThickness="0,1,1,1" BorderBrush="{x:Null}">
                 <ProgressBar.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="-1"/>
@@ -101,7 +101,7 @@
                     </TransformGroup>
                 </ProgressBar.RenderTransform>
             </ProgressBar>
-            <ProgressBar x:Name="volumeBarR" Background="#FF212121" Foreground="#FF00D8D3" RenderTransformOrigin="0.5,0.5" Grid.Column="1" BorderThickness="0,1,1,1" BorderBrush="{x:Null}">
+            <ProgressBar x:Name="volumeBarR" Foreground="#FF00D8D3" Background="{x:Null}" RenderTransformOrigin="0.5,0.5" Grid.Column="1" BorderThickness="0,1,1,1" BorderBrush="{x:Null}">
                 <ProgressBar.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -114,7 +114,7 @@
         </Grid>
         <CheckBox x:Name="stereoCheckBox" Grid.Column="1" Content="Stereo" HorizontalAlignment="Left" Margin="10,21,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="stereoCheckBox_Changed" Checked="stereoCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF"/>
         <CheckBox x:Name="FftWindowCheckBox" Grid.Column="1" Content="FFT Window" HorizontalAlignment="Left" Margin="10,36,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="fftWindowCheckBox_Changed" Checked="fftWindowCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF"/>
-        <ComboBox Style="{DynamicResource ComboBoxTransparentStyle}" x:Name="sampleRateComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="129,18,0,0" Grid.Row="1" VerticalAlignment="Top" Width="89" SelectionChanged="sampleRateComboBox_SelectionChanged" Foreground="#FF00DDFF" Height="22" BorderBrush="{x:Null}" Background="{x:Null}">
+        <ComboBox Style="{DynamicResource ComboBoxTransparentStyle}" x:Name="sampleRateComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="109,17,0,0" Grid.Row="1" VerticalAlignment="Top" Width="89" SelectionChanged="sampleRateComboBox_SelectionChanged" Foreground="#FF00DDFF" Height="22" BorderBrush="{x:Null}" Background="{x:Null}">
             <ComboBoxItem Content="8.000Hz"/>
             <ComboBoxItem Content="11.025Hz"/>
             <ComboBoxItem Content="16.000Hz"/>
@@ -128,7 +128,7 @@
             <ComboBoxItem Content="352.800Hz"/>
             <ComboBoxItem Content="384.000Hz"/>
         </ComboBox>
-        <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="129,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click"/>
+        <Button x:Name="addCBBtn" Grid.Column="1" Content="Add SR" HorizontalAlignment="Left" Margin="109,40,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Background="{x:Null}" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Click="addCBBtn_Click" RenderTransformOrigin="0.248,0.432"/>
         <CheckBox x:Name="LogScaleCheckBox" Grid.Column="1" Content="Log FFT" HorizontalAlignment="Left" Margin="10,51,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" Unchecked="LogScaleCheckBox_Changed" BorderBrush="#8800AAFF" Background="{x:Null}" Foreground="#FF00DDFF" Checked="LogScaleCheckBox_Changed"/>
     </Grid>
 
