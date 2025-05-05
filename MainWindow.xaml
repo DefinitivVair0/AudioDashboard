@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="ADB-v0" Height="600" Width="1080" Closing="ClosingEventHandler" MinWidth="800" MinHeight="450" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown"
     xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" WindowState="Maximized">
-    <Grid>
+    <Grid Background="#FF212121">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
@@ -79,13 +79,13 @@
         <Button x:Name="startBtn" Content="I" HorizontalAlignment="Right" Margin="0,15,10,0" Width="25" Click="startBtn_Click" Background="#FF004600" Grid.Column="1" Grid.Row="1" Height="25" VerticalAlignment="Top" BorderBrush="{x:Null}"/>
         <Button x:Name="stopBtn" Content="O" Margin="0,40,10,0" Click="stopBtn_Click" Background="#FFF80000" HorizontalAlignment="Right" Width="25" Grid.Column="1" Grid.Row="1" Height="24" VerticalAlignment="Top" BorderBrush="{x:Null}"/>
         <Label Content="Multiplier" Margin="0,40,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="66" Height="24" VerticalAlignment="Top" Foreground="#FF00DDFF"/>
-        <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,15,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" TextChanged="bufferMSTextBox_TextChanged" Height="25" VerticalAlignment="Top" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
+        <TextBox x:Name="bufferMSTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,15,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" TextChanged="bufferMSTextBox_TextChanged" Height="25" VerticalAlignment="Top" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Background="{x:Null}"/>
         <ListBox x:Name="deviceBox" d:ItemsSource="{d:SampleData ItemCount=5}" Background="#FF212121" Margin="10,75,10,10" Grid.Column="1" Grid.Row="1" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
-        <Label x:Name="infoLabel" Content="" Margin="0,34,22,0" Grid.Column="1" Height="75" VerticalAlignment="Top" HorizontalAlignment="Right" Width="301" HorizontalContentAlignment="Right"/>
+        <Label x:Name="infoLabel" Content="" Margin="0,34,22,0" Grid.Column="1" Height="75" VerticalAlignment="Top" HorizontalAlignment="Right" Width="301" HorizontalContentAlignment="Right" Foreground="#FFADADAD"/>
         <ScottPlot:WpfPlot x:Name="fftPlot" Margin="10,10,10,10"/>
         <ScottPlot:WpfPlot x:Name="execTimePlot" Margin="10,10,10,10" Grid.Column="1"/>
         <Label Content="Buffer ms" Margin="0,15,72,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" Width="65" Height="25" VerticalAlignment="Top" Foreground="#FF00DDFF"/>
-        <TextBox x:Name="updateMulTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" Height="24" VerticalAlignment="Top" TextChanged="updateMulTextBox_TextChanged" BorderBrush="#8800AAFF" Foreground="#FF00DDFF"/>
+        <TextBox x:Name="updateMulTextBox" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,40,0" Grid.Row="1" TextWrapping="Wrap" Width="32" Height="24" VerticalAlignment="Top" TextChanged="updateMulTextBox_TextChanged" BorderBrush="#8800AAFF" Foreground="#FF00DDFF" Background="{x:Null}"/>
         <Grid Margin="10,0,10,10" Grid.Row="1" Height="23" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
